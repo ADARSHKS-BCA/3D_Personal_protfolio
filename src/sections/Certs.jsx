@@ -14,20 +14,21 @@ export default function Certs() {
     const isMobile = window.innerWidth < 768;
     const reduce = isMobile ? 0.5 : 1;
 
-    // Hide section initially
-    gsap.set(sectionRef.current, { opacity: 0 });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible')
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.15 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
 
     const ctx = gsap.context(() => {
-      // Section reveal
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => {
-          gsap.set(sectionRef.current, { opacity: 1 });
-        },
-      });
-
       // Heading: fade up
       const heading = sectionRef.current.querySelector('h2');
       if (heading) {
@@ -41,8 +42,9 @@ export default function Certs() {
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top 85%',
+              start: 'top 90%',
               once: true,
+              invalidateOnRefresh: true,
             },
           }
         );
@@ -63,8 +65,9 @@ export default function Certs() {
             ease: 'back.out(1.4)',
             scrollTrigger: {
               trigger: validCards[0],
-              start: 'top 85%',
+              start: 'top 90%',
               once: true,
+              invalidateOnRefresh: true,
             },
           }
         );
@@ -73,13 +76,21 @@ export default function Certs() {
 
     return () => {
       ctx.revert();
+      observer.disconnect();
     };
   }, []);
 
   return (
-    <section id="certifications" className="section-container section-padding bg-white dark:bg-bg text-gray-900 dark:text-text" ref={sectionRef}>
+    <section
+      id="certifications"
+      className="section-container section-padding bg-white dark:bg-bg text-gray-900 dark:text-text certifications-section reveal-section"
+      ref={sectionRef}
+      data-animate
+    >
+      <div className="section-divider"></div>
       <h2
         className="gradient-text"
+        data-animate
         style={{
           fontSize: 'clamp(2rem, 5vw, 3rem)',
           fontWeight: 700,
@@ -105,6 +116,7 @@ export default function Certs() {
             key={cert.id || i}
             ref={(el) => (cardsRef.current[i] = el)}
             className="glass-card shine-effect cert-card"
+            data-animate
             style={{
               padding: '1.5rem',
               borderRadius: '0.75rem',

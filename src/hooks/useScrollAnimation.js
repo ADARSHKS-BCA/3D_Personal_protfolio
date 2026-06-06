@@ -64,9 +64,10 @@ export function useScrollAnimation(options = {}) {
         trigger: el,
         start,
         end,
-        scrub,
+        scrub: scrub === true ? 0.5 : scrub,
         markers,
         toggleActions: once ? 'play none none none' : 'play reverse play reverse',
+        invalidateOnRefresh: true,
       },
     });
 
@@ -107,6 +108,7 @@ export function useStaggerAnimation(options = {}) {
           trigger: el,
           start,
           toggleActions: 'play none none none',
+          invalidateOnRefresh: true,
         },
       }
     );

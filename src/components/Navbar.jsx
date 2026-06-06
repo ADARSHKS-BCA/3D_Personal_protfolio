@@ -16,6 +16,18 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const toggleBtnRef = useRef(null);
   const navRef = useRef(null);
+  
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > window.innerHeight * 0.3)
+    }
+    window.addEventListener('scroll', handleScroll, 
+      { passive: true })
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, []);
 
   // Scroll detection for shrink effect
   useEffect(() => {
@@ -101,8 +113,10 @@ const Navbar = () => {
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           borderBottom: isDark ? '1px solid rgba(212, 175, 55, 0.1)' : '1px solid rgba(212, 175, 55, 0.18)',
-          transition: 'padding 300ms ease, background-color 0.3s ease, border-color 0.3s ease',
           padding: isScrolled ? '12px 0' : '20px 0',
+          transform: visible ? 'translateY(0)' : 'translateY(-100%)',
+          opacity: visible ? 1 : 0,
+          transition: 'transform 0.4s ease, opacity 0.4s ease, padding 300ms ease, background-color 0.3s ease, border-color 0.3s ease',
         }}
       >
         <div

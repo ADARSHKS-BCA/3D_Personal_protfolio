@@ -555,9 +555,10 @@ function LaptopScene() {
         trigger: '#hero',
         start: 'top top',
         end: '+=200%',
-        scrub: 1.5,
+        scrub: 0.5,
         pin: true,
-        anticipatePin: 1
+        anticipatePin: 1,
+        invalidateOnRefresh: true
       }
     });
 
@@ -672,6 +673,19 @@ function LaptopScene() {
 
   const trackpadGeo = useMemo(() => new THREE.BoxGeometry(1.0, 0.02, 0.65), []);
   const trackpadEdges = useMemo(() => new THREE.EdgesGeometry(trackpadGeo), [trackpadGeo]);
+
+  // Dispose geometries, materials, and textures on unmount
+  useEffect(() => {
+    return () => {
+      if (logoTexture) logoTexture.dispose();
+      baseGeo.dispose();
+      baseEdges.dispose();
+      lidGeo.dispose();
+      lidEdges.dispose();
+      trackpadGeo.dispose();
+      trackpadEdges.dispose();
+    };
+  }, [logoTexture, baseGeo, baseEdges, lidGeo, lidEdges, trackpadGeo, trackpadEdges]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);

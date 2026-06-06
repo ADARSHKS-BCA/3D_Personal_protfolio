@@ -15,20 +15,37 @@ export default function Education() {
     const isMobile = window.innerWidth < 768;
     const reduce = isMobile ? 0.5 : 1;
 
-    // Hide section initially
-    gsap.set(sectionRef.current, { opacity: 0 });
+    /* ── Section reveal ── */
+    const sectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          sectionObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.15 }
+    );
+    sectionObserver.observe(sectionRef.current);
 
+    /* ── Per-node card reveal via IntersectionObserver ── */
+    const nodeObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('edu-node-visible');
+            nodeObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    nodesRef.current.forEach((node) => {
+      if (node) nodeObserver.observe(node);
+    });
+
+    /* ── GSAP: heading + timeline line draw ── */
     const ctx = gsap.context(() => {
-      // Section reveal
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => {
-          gsap.set(sectionRef.current, { opacity: 1 });
-        },
-      });
-
       // Heading: fade up
       const heading = sectionRef.current.querySelector('h2');
       if (heading) {
@@ -42,8 +59,9 @@ export default function Education() {
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top 85%',
+              start: 'top 90%',
               once: true,
+              invalidateOnRefresh: true,
             },
           }
         );
@@ -61,71 +79,33 @@ export default function Education() {
               trigger: sectionRef.current,
               start: 'top 70%',
               end: 'bottom 30%',
-              scrub: 1,
+              scrub: 0.5,
+              invalidateOnRefresh: true,
             },
           }
         );
       }
-
-      // Each timeline node
-      nodesRef.current.forEach((node, i) => {
-        if (!node) return;
-        const isEven = i % 2 === 1;
-        const card = node.querySelector('.timeline-card');
-        const marker = node.querySelector('.timeline-marker');
-
-        if (card) {
-          const xDir = isEven ? -60 * reduce : 60 * reduce;
-          gsap.set(card, { willChange: 'transform' });
-          gsap.fromTo(
-            card,
-            { opacity: 0, x: xDir },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 0.6,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: node,
-                start: 'top 85%',
-                once: true,
-              },
-              onComplete: () => {
-                gsap.set(card, { willChange: 'auto' });
-              },
-            }
-          );
-        }
-
-        if (marker) {
-          gsap.fromTo(
-            marker,
-            { scale: 0, opacity: 0 },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.3,
-              ease: 'back.out(1.7)',
-              scrollTrigger: {
-                trigger: node,
-                start: 'top 85%',
-                once: true,
-              },
-            }
-          );
-        }
-      });
     }, sectionRef);
 
     return () => {
       ctx.revert();
+      sectionObserver.disconnect();
+      nodeObserver.disconnect();
     };
   }, []);
 
   return (
-    <section id="education" className="section-container section-padding bg-gray-50 dark:bg-bg text-gray-900 dark:text-text" ref={sectionRef}>
+    <section
+      id="education"
+      className="section-container section-padding bg-gray-50 dark:bg-bg text-gray-900 dark:text-text education-section reveal-section"
+      ref={sectionRef}
+      data-animate
+      style={{ overflow: 'hidden' }}
+    >
+      <div className="section-divider"></div>
       <h2
         className="gradient-text"
+        data-animate
         style={{
           fontSize: 'clamp(2rem, 5vw, 3rem)',
           fontWeight: 700,
@@ -140,6 +120,7 @@ export default function Education() {
         {/* Vertical timeline line */}
         <div
           ref={lineRef}
+          data-animate
           style={{
             position: 'absolute',
             left: '50%',
@@ -151,7 +132,7 @@ export default function Education() {
             transform: 'scaleY(0)',
             marginLeft: '-1px',
           }}
-          className="timeline-line"
+          className="edu-timeline-line"
         />
 
         {/* Timeline nodes */}
@@ -162,7 +143,8 @@ export default function Education() {
               <div
                 key={entry.id || i}
                 ref={(el) => (nodesRef.current[i] = el)}
-                className="timeline-node"
+                className="edu-timeline-node"
+                data-animate
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -172,7 +154,7 @@ export default function Education() {
               >
                 {/* Marker circle */}
                 <div
-                  className="timeline-marker"
+                  className="edu-timeline-marker"
                   style={{
                     position: 'absolute',
                     left: '50%',
@@ -182,14 +164,32 @@ export default function Education() {
                     borderRadius: '50%',
                     border: '2px solid var(--gold)',
                     background: 'var(--bg)',
-                    transform: 'translateX(-50%)',
+                    transform: 'translateX(-50%) scale(0)',
                     zIndex: 2,
+                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease, box-shadow 0.4s ease',
+                  }}
+                />
+
+                {/* Horizontal connector line */}
+                <div
+                  className="edu-timeline-connector"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(1.5rem + 7px)',
+                    height: '2px',
+                    background: 'var(--gold)',
+                    opacity: 0,
+                    transition: 'opacity 0.4s ease 0.2s',
+                    ...(!isEven
+                      ? { left: 'calc(50% + 8px)', width: 'calc(2.5rem - 8px)' }
+                      : { right: 'calc(50% + 8px)', width: 'calc(2.5rem - 8px)' }
+                    ),
                   }}
                 />
 
                 {/* Card */}
                 <div
-                  className="timeline-card glass-card"
+                  className={`edu-timeline-card glass-card ${!isEven ? 'edu-card-right' : 'edu-card-left'}`}
                   style={{
                     width: 'calc(50% - 2.5rem)',
                     padding: '1.5rem',
@@ -253,24 +253,84 @@ export default function Education() {
         </div>
       </div>
 
-      {/* Mobile & responsive styles */}
+      {/* Timeline styles */}
       <style>{`
+        /* ── Card slide-in transitions ── */
+        .edu-timeline-card {
+          opacity: 0;
+          transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+                      transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+          will-change: opacity, transform;
+        }
+
+        .edu-card-right {
+          transform: translateX(80px);
+        }
+
+        .edu-card-left {
+          transform: translateX(-80px);
+        }
+
+        /* ── Visible state triggered per-node ── */
+        .edu-node-visible .edu-timeline-card {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .edu-node-visible .edu-timeline-marker {
+          transform: translateX(-50%) scale(1) !important;
+          background: var(--gold) !important;
+          box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.3);
+          animation: edu-dot-pulse 2s ease-in-out infinite;
+        }
+
+        .edu-node-visible .edu-timeline-connector {
+          opacity: 1 !important;
+        }
+
+        @keyframes edu-dot-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 0 8px rgba(212, 175, 55, 0), 0 0 20px rgba(212, 175, 55, 0.1);
+          }
+        }
+
+        /* ── Responsive: mobile < 768px ── */
         @media (max-width: 768px) {
-          .timeline-line {
+          .edu-timeline-line {
             left: 1rem !important;
             margin-left: 0 !important;
-            transform-origin: top !important;
           }
-          .timeline-node {
+
+          .edu-timeline-node {
             justify-content: flex-start !important;
-            padding-left: 2.5rem;
+            padding-left: 3rem;
           }
-          .timeline-node .timeline-card {
+
+          .edu-timeline-node .edu-timeline-card {
             width: 100% !important;
           }
-          .timeline-marker {
+
+          .edu-card-right,
+          .edu-card-left {
+            transform: translateX(80px);
+          }
+
+          .edu-node-visible .edu-card-right,
+          .edu-node-visible .edu-card-left {
+            transform: translateX(0);
+          }
+
+          .edu-timeline-marker {
             left: 1rem !important;
-            transform: translateX(-50%) !important;
+          }
+
+          .edu-timeline-connector {
+            left: calc(1rem + 8px) !important;
+            right: auto !important;
+            width: calc(2rem - 8px) !important;
           }
         }
       `}</style>

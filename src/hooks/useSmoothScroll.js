@@ -5,21 +5,20 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ limitCallbacks: true });
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 export function useSmoothScroll() {
   const lenisRef = useRef(null);
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.6,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      smoothTouch: false,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
-      autoResize: true,
+      duration: 0.8,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+      smoothWheel: true,
+      wheelMultiplier: 1.2,
+      normalizeWheel: true,
+      infinite: false,
     });
 
     lenisRef.current = lenis;
@@ -28,13 +27,18 @@ export function useSmoothScroll() {
     // Sync Lenis scroll with GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Named raf callback so we can properly remove it
-    function tickerCallback(time) {
+    // Sync GSAP ticker with Lenis
+    const tickerCallback = (time) => {
       lenis.raf(time * 1000);
-    }
-
+    };
     gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
+
+    // Mobile fix
+    if (window.innerWidth < 768) {
+      lenis.destroy();
+      ScrollTrigger.normalizeScroll(true);
+    }
 
     // Refresh ScrollTrigger after Lenis initializes
     ScrollTrigger.refresh();
@@ -42,8 +46,11 @@ export function useSmoothScroll() {
     // Delayed refresh to catch lazy-loaded content
     const refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 1000);
 
-    // Also refresh on window load
-    const handleLoad = () => ScrollTrigger.refresh();
+    // Load listener for refresh and resize
+    const handleLoad = () => {
+      ScrollTrigger.refresh();
+      lenis.resize();
+    };
     window.addEventListener('load', handleLoad);
 
     return () => {

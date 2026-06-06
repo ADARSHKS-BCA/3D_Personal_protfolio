@@ -17,6 +17,8 @@ const SKILLS = [
   'MongoDB',
   'Figma',
   'Docker',
+  'C++',
+  'Flutter',
 ];
 
 const BIO_PARAGRAPHS = [
@@ -92,10 +94,17 @@ function TiltCard() {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Gradient placeholder image */}
-        <div className="about__photo-placeholder">
-          <span className="about__initials">Adarsh</span>
-        </div>
+        {/* Profile image */}
+        <img
+          src="/profile.jpg"
+          alt="Adarsh"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
 
         {/* Open to work badge */}
         <div className="about__badge">
@@ -138,19 +147,21 @@ export default function About() {
     const isMobile = window.innerWidth < 768;
     const reduce = isMobile ? 0.5 : 1;
 
-    // Hide section initially
-    gsap.set(sectionRef.current, { opacity: 0 });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible')
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.15 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
 
     const ctx = gsap.context(() => {
-      // Section reveal
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => {
-          gsap.set(sectionRef.current, { opacity: 1 });
-        },
-      });
 
       // Left side (photo): slide from left
       if (leftColRef.current) {
@@ -167,6 +178,7 @@ export default function About() {
               trigger: sectionRef.current,
               start: 'top 85%',
               once: true,
+              invalidateOnRefresh: true,
             },
             onComplete: () => {
               gsap.set(leftColRef.current, { willChange: 'auto' });
@@ -191,6 +203,7 @@ export default function About() {
               trigger: sectionRef.current,
               start: 'top 85%',
               once: true,
+              invalidateOnRefresh: true,
             },
             onComplete: () => {
               gsap.set(rightColRef.current, { willChange: 'auto' });
@@ -199,7 +212,7 @@ export default function About() {
         );
 
         // Each text line inside right
-        const textElements = rightColRef.current.querySelectorAll('.about__heading-word, .about__bio-paragraph, .about__skills, .about__cta');
+        const textElements = rightColRef.current.querySelectorAll('.about__heading-word, .about__bio-paragraph, .about__cta');
         if (textElements.length) {
           gsap.fromTo(
             textElements,
@@ -215,6 +228,7 @@ export default function About() {
                 trigger: sectionRef.current,
                 start: 'top 85%',
                 once: true,
+                invalidateOnRefresh: true,
               },
             }
           );
@@ -224,11 +238,13 @@ export default function About() {
 
     return () => {
       ctx.revert();
+      observer.disconnect();
     };
   }, []);
 
   return (
-    <section className="about section-padding bg-white dark:bg-bg text-gray-900 dark:text-text" id="about" ref={sectionRef}>
+    <section className="about section-padding bg-white dark:bg-bg text-gray-900 dark:text-text about-section reveal-section" id="about" ref={sectionRef}>
+      <div className="section-divider"></div>
       <div className="section-container">
         <div className="about__grid">
           {/* Left column – Photo card */}
@@ -248,14 +264,7 @@ export default function About() {
               ))}
             </div>
 
-            {/* Skills chips */}
-            <div className="about__skills">
-              {SKILLS.map((skill) => (
-                <span key={skill} className="tech-chip">
-                  {skill}
-                </span>
-              ))}
-            </div>
+
 
             {/* Download CV button */}
             <div className="about__cta">
