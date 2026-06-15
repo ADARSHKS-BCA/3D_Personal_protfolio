@@ -1,425 +1,321 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '../data/projects';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ── Magnetic hover wrapper ── */
-function MagneticWrapper({ children }) {
-  const wrapperRef = useRef(null);
-  const isTouchDevice = useRef(false);
+// ── Magnetic Button Component ──
+function MagneticButton({ children, href, target, rel, className, style, onMouseEnter, onMouseLeave }) {
+  const btnRef = useRef(null);
 
-  useEffect(() => {
-    isTouchDevice.current = window.matchMedia('(hover: none)').matches;
-    if (isTouchDevice.current || !wrapperRef.current) return;
+  const handleMouseMove = (e) => {
+    const btn = btnRef.current;
+    if (!btn || window.innerWidth < 1024) return;
 
-    const el = wrapperRef.current;
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
 
-    const handleMouseMove = (e) => {
-      const rect = el.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const offsetX = ((e.clientX - centerX) / rect.width) * 10;
-      const offsetY = ((e.clientY - centerY) / rect.height) * 10;
+    gsap.to(btn, {
+      x: x * 0.35,
+      y: y * 0.35,
+      scale: 1.05,
+      duration: 0.3,
+      ease: 'power3.out',
+    });
+  };
 
-      el.style.transition = 'transform 0.15s linear, box-shadow 0.15s linear';
-      el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.02)`;
-      el.style.boxShadow = '0 0 20px rgba(212, 175, 55, 0.2), 0 0 40px rgba(212, 175, 55, 0.08)';
-    };
+  const handleMouseLeave = (e) => {
+    const btn = btnRef.current;
+    if (!btn) return;
 
-    const handleMouseLeave = () => {
-      el.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-      el.style.transform = 'translate(0, 0) scale(1)';
-      el.style.boxShadow = 'none';
-    };
-
-    el.addEventListener('mousemove', handleMouseMove);
-    el.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      el.removeEventListener('mousemove', handleMouseMove);
-      el.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
+    gsap.to(btn, {
+      x: 0,
+      y: 0,
+      scale: 1,
+      duration: 0.5,
+      ease: 'elastic.out(1, 0.3)',
+    });
+    if (onMouseLeave) onMouseLeave(e);
+  };
 
   return (
-    <div ref={wrapperRef} style={{ borderRadius: '16px', willChange: 'transform' }}>
+    <a
+      ref={btnRef}
+      href={href}
+      target={target}
+      rel={rel}
+      className={className}
+      style={{ ...style, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.3s ease, background 0.3s ease' }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={onMouseEnter}
+    >
       {children}
+    </a>
+  );
+}
+
+// ── Screenshot Carousel Component ──
+function ImageCarousel({ images, title }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!images || images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [images]);
+
+  if (!images || images.length === 0) return null;
+
+  return (
+    <div className="relative w-full h-full overflow-hidden bg-slate-950">
+      {images.map((src, idx) => (
+        <div
+          key={idx}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: idx === currentIndex ? 1 : 0, zIndex: idx === currentIndex ? 2 : 1 }}
+        >
+          <img
+            src={src}
+            alt={`${title} screenshot ${idx + 1}`}
+            className="w-full h-full object-cover project-card-img transition-transform duration-500 ease-out"
+            style={{ transformOrigin: 'center' }}
+          />
+        </div>
+      ))}
+      
+      {/* Indicator Dots */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-10 bg-slate-900/50 backdrop-blur-sm py-1 px-2.5 rounded-full border border-white/5">
+          {images.map((_, idx) => (
+            <span
+              key={idx}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? 'bg-indigo-400 w-3' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-/* ── Single flip card ── */
-function ProjectCard({ project }) {
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  return (
-    <div className="flip-card" style={{ height: '350px' }}>
-      <div className="flip-card-inner">
-        {/* ── Front Face ── */}
-        <div
-          className="flip-card-front"
-          style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* Image area */}
-          {project.images && project.images.length > 0 ? (
-            <div
-              style={{
-                height: '230px',
-                position: 'relative',
-                flexShrink: 0,
-                overflow: 'hidden',
-                background: 'var(--surface)',
-              }}
-            >
-              <div
-                className="proj-carousel-track"
-                style={{
-                  display: 'flex',
-                  width: `${project.images.length * 200}%`,
-                  height: '100%',
-                  animation: `proj-slide-${project.images.length} ${project.images.length * 3.8}s linear infinite`,
-                }}
-              >
-                {/* Double the images for seamless loop */}
-                {[...project.images, ...project.images].map((src, idx) => (
-                  <img
-                    key={idx}
-                    src={src}
-                    alt={`${project.title} screenshot ${(idx % project.images.length) + 1}`}
-                    style={{
-                      width: `${100 / (project.images.length * 2)}%`,
-                      height: '100%',
-                      objectFit: 'cover',
-                      flexShrink: 0,
-                    }}
-                  />
-                ))}
+// ── Custom Graphic Composition for Projects without Screenshots ──
+function ProjectGraphic({ projectId, title, tech }) {
+  if (projectId === 'securebank') {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        {/* Abstract grids */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+        <div className="absolute w-[200px] h-[200px] rounded-full bg-blue-500/10 dark:bg-emerald-500/10 blur-[80px] -top-10 -right-10 pointer-events-none" />
+        <div className="absolute w-[250px] h-[250px] rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 blur-[100px] -bottom-10 -left-10 pointer-events-none" />
+
+        {/* Floating Credit Card Mockup */}
+        <div className="w-[320px] h-[190px] rounded-2xl bg-gradient-to-br from-white to-slate-100 dark:from-indigo-950/80 dark:to-slate-950/80 border border-slate-200 dark:border-indigo-500/30 backdrop-blur-lg p-6 shadow-xl dark:shadow-2xl flex flex-col justify-between relative transform -rotate-6 hover:rotate-0 transition-transform duration-500 z-10 group">
+          <div className="flex justify-between items-start">
+            <div className="w-12 h-9 rounded bg-gradient-to-br from-amber-400 to-yellow-500 relative overflow-hidden flex items-center justify-center border border-yellow-300/20">
+              {/* Chip lines */}
+              <div className="absolute inset-1 border border-black/10 rounded" />
+            </div>
+            <div className="text-right">
+              <span className="text-slate-400 dark:text-white/40 text-[9px] uppercase tracking-widest font-mono">SecureBank</span>
+              <div className="text-blue-600 dark:text-emerald-400 text-xs font-semibold">SSL ACTIVE</div>
+            </div>
+          </div>
+          
+          <div>
+            <div className="text-slate-800 dark:text-white/80 font-mono tracking-widest text-sm mb-1.5">**** **** **** 8820</div>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-white/40 font-mono">
+              <div>
+                <div>CARDHOLDER</div>
+                <div className="text-slate-700 dark:text-white/70 font-semibold tracking-wide">ADARSH K. S.</div>
+              </div>
+              <div className="text-right">
+                <div>EXPIRES</div>
+                <div className="text-slate-700 dark:text-white/70 font-semibold">12/29</div>
               </div>
             </div>
-          ) : (
-            <div
-              style={{
-                height: '230px',
-                background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background:
-                    'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.12) 0%, transparent 60%)',
-                }}
-              />
-              <h3
-                style={{
-                  color: '#fff',
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                  textAlign: 'center',
-                  padding: '0 20px',
-                  position: 'relative',
-                  zIndex: 1,
-                  textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                  margin: 0,
-                }}
-              >
-                {project.title}
-              </h3>
-            </div>
-          )}
+          </div>
+        </div>
 
-          {/* Info area */}
-          <div
-            style={{
-              padding: '12px 16px',
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <h3
-                style={{
-                  color: 'var(--text)',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  margin: '0 0 4px 0',
-                }}
-              >
-                {project.title}
-              </h3>
-              <span
-                style={{
-                  display: 'inline-block',
-                  padding: '2px 8px',
-                  fontSize: '0.64rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: 'var(--gold)',
-                  background: 'rgba(212, 175, 55, 0.12)',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(212, 175, 55, 0.2)',
-                }}
-              >
-                {project.category}
-              </span>
-            </div>
+        {/* Key indicator tags */}
+        <div className="absolute bottom-8 right-8 bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-emerald-500/30 text-blue-600 dark:text-emerald-400 text-[10px] px-3 py-1.5 rounded-full font-mono flex items-center gap-1.5 shadow-md">
+          <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-emerald-400 animate-pulse" />
+          LEDGER AUDIT COMPLETED
+        </div>
+      </div>
+    );
+  }
 
-            {/* Tech pills */}
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '4px',
-                marginTop: '8px',
-              }}
-            >
-              {(project.tech || []).slice(0, 3).map((t) => (
-                <span
-                  key={t}
-                  className="tech-chip"
-                  style={{
-                    fontSize: '0.72rem',
-                    padding: '3px 10px',
-                  }}
-                >
-                  {t}
-                </span>
+  if (projectId === 'find-your-venue') {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-slate-50 via-slate-100 to-emerald-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
+        <div className="absolute w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[90px] top-10 left-10 pointer-events-none" />
+
+        {/* Floating Map Composition */}
+        <div className="w-[280px] h-[280px] relative z-10 flex items-center justify-center">
+          {/* Circular map frame */}
+          <div className="absolute inset-0 rounded-full border border-slate-200 dark:border-emerald-500/20 bg-white/80 dark:bg-slate-950/60 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            {/* Grid gridlines to simulate floor map */}
+            <div className="w-[140%] h-[140%] rotate-12 opacity-35 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.1)_0%,transparent_70%)] flex flex-wrap gap-4 p-4">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="w-16 h-16 border border-emerald-500/15 dark:border-emerald-500/25 rounded-lg flex items-center justify-center text-[10px] text-emerald-600/30 dark:text-emerald-500/30">
+                  Block {String.fromCharCode(65 + i)}
+                </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* ── Back Face ── */}
-        <div
-          className="flip-card-back"
-          style={{
-            background:
-              'linear-gradient(160deg, var(--surface) 0%, rgba(212, 175, 55, 0.08) 100%)',
-            border: '1px solid var(--border)',
-            borderRadius: '16px',
-            padding: '16px 16px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              overflowY: 'auto',
-              marginBottom: '8px',
-              paddingRight: '4px',
-            }}
-          >
-            <h3
-              style={{
-                color: 'var(--text)',
-                fontSize: '1rem',
-                fontWeight: 700,
-                margin: '0 0 6px 0',
-              }}
-            >
-              {project.title}
-            </h3>
-            <p
-              style={{
-                color: 'var(--text-muted)',
-                fontSize: '0.8rem',
-                lineHeight: 1.5,
-                margin: 0,
-                display: '-webkit-box',
-                WebkitLineClamp: isExpanded ? 'unset' : 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {project.desc}
-            </p>
-            {project.desc.length > 100 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsExpanded(!isExpanded);
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--gold)',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '4px 0 0 0',
-                  textDecoration: 'underline',
-                  alignSelf: 'flex-start',
-                }}
-              >
-                {isExpanded ? 'Read Less' : 'Read More'}
-              </button>
-            )}
+          {/* Glowing central location pin */}
+          <div className="w-12 h-12 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-400 flex items-center justify-center relative z-20 shadow-[0_0_25px_rgba(16,185,129,0.3)] dark:shadow-[0_0_25px_rgba(16,185,129,0.5)] animate-bounce">
+            <span className="text-xl">📍</span>
+            <span className="absolute -inset-2 rounded-full border border-emerald-400/40 animate-ping" />
           </div>
 
-          {/* Action buttons */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              marginTop: '8px',
-            }}
-          >
-            <a
-              href={project.githubUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '8px 0',
-                background: 'rgba(20, 19, 13, 0.7)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(212, 175, 55, 0.2)',
-                borderRadius: '10px',
-                color: 'var(--text)',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                cursor: 'pointer',
-                transition:
-                  'border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 223, 122, 0.6)';
-                e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.2)';
-                e.currentTarget.style.background = 'rgba(20, 19, 13, 0.7)';
-              }}
-            >
-              <span style={{ fontSize: '0.9rem' }}>⟨/⟩</span>
-              Code
-            </a>
-
-            <a
-              href={project.liveUrl || '#'}
-              target={project.liveUrl ? "_blank" : undefined}
-              rel={project.liveUrl ? "noopener noreferrer" : undefined}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '10px 0',
-                background: 'rgba(20, 19, 13, 0.7)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(212, 175, 55, 0.2)',
-                borderRadius: '10px',
-                color: project.liveUrl ? 'var(--text)' : 'var(--text-muted)',
-                opacity: project.liveUrl ? 1 : 0.5,
-                pointerEvents: project.liveUrl ? 'auto' : 'none',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                cursor: project.liveUrl ? 'pointer' : 'default',
-                transition:
-                  'border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-              onMouseEnter={(e) => {
-                if (!project.liveUrl) return;
-                e.currentTarget.style.borderColor = 'rgba(255, 223, 122, 0.6)';
-                e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                if (!project.liveUrl) return;
-                e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.2)';
-                e.currentTarget.style.background = 'rgba(20, 19, 13, 0.7)';
-              }}
-            >
-              <span style={{ fontSize: '1rem' }}>↗</span>
-              Live
-            </a>
+          {/* Floating Venue Tags */}
+          <div className="absolute top-4 right-0 bg-white/95 dark:bg-slate-900/80 border border-slate-200 dark:border-emerald-500/30 text-slate-800 dark:text-white/90 text-[10px] py-1.5 px-3 rounded-lg shadow-lg rotate-12 flex flex-col gap-0.5">
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">Auditorium Main</span>
+            <span className="text-slate-500 dark:text-white/50 text-[8px]">Capacity: 500 Seats</span>
+          </div>
+          
+          <div className="absolute bottom-6 left-0 bg-white/95 dark:bg-slate-900/80 border border-slate-200 dark:border-emerald-500/30 text-slate-800 dark:text-white/90 text-[10px] py-1.5 px-3 rounded-lg shadow-lg -rotate-6 flex flex-col gap-0.5">
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">Conference Room C</span>
+            <span className="text-slate-500 dark:text-white/50 text-[8px]">Status: Reserved 2PM</span>
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (projectId === 'semantic-search') {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-slate-50 via-slate-100 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+        <div className="absolute w-[250px] h-[250px] rounded-full bg-purple-500/10 blur-[80px] -bottom-10 -right-10 pointer-events-none" />
+
+        {/* Neural Vector Search Composition */}
+        <div className="relative w-full max-w-[340px] z-10 flex flex-col gap-3">
+          {/* Query Bar Mock */}
+          <div className="w-full bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-purple-500/30 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-purple-500 dark:text-purple-400">🔍</span>
+              <span className="text-slate-700 dark:text-white/70 italic">"healthcare appointment booking"</span>
+            </div>
+            <span className="text-[10px] text-purple-600 dark:text-purple-400 font-mono px-2 py-0.5 bg-purple-500/10 rounded-md border border-purple-500/20">COSINE</span>
+          </div>
+
+          {/* Results Stack */}
+          <div className="flex flex-col gap-2 relative pl-4 border-l border-slate-200 dark:border-purple-500/30">
+            <div className="w-full bg-white/70 dark:bg-slate-900/40 border border-slate-200 dark:border-purple-500/20 rounded-xl p-3 flex justify-between items-center transform translate-x-2 shadow-sm">
+              <div className="flex flex-col gap-1 max-w-[70%]">
+                <span className="text-slate-800 dark:text-white/90 text-xs font-semibold">MediConnect Platform</span>
+                <span className="text-slate-500 dark:text-white/40 text-[10px] line-clamp-1">telemedicine slot scheduling for clinics...</span>
+              </div>
+              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/25 px-2 py-0.5 rounded">Score: 0.982</span>
+            </div>
+            
+            <div className="w-full bg-white/70 dark:bg-slate-900/40 border border-slate-200 dark:border-purple-500/15 rounded-xl p-3 flex justify-between items-center opacity-70 transform translate-x-1 shadow-sm">
+              <div className="flex flex-col gap-1 max-w-[70%]">
+                <span className="text-slate-800 dark:text-white/90 text-xs font-semibold">Hospital Directory API</span>
+                <span className="text-slate-500 dark:text-white/40 text-[10px] line-clamp-1">list of healthcare systems and contact data...</span>
+              </div>
+              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/15 dark:border-emerald-500/25 px-2 py-0.5 rounded">Score: 0.814</span>
+            </div>
+
+            <div className="w-full bg-white/70 dark:bg-slate-900/40 border border-slate-200 dark:border-purple-500/10 rounded-xl p-3 flex justify-between items-center opacity-40 shadow-sm">
+              <div className="flex flex-col gap-1 max-w-[70%]">
+                <span className="text-slate-800 dark:text-white/90 text-xs font-semibold">Fitness Tracking Service</span>
+                <span className="text-slate-500 dark:text-white/40 text-[10px] line-clamp-1">log workouts, run streaks, calorie deficits...</span>
+              </div>
+              <span className="text-xs font-mono text-purple-600 dark:text-purple-400 bg-purple-500/10 border border-purple-500/10 px-2 py-0.5 rounded">Score: 0.450</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback default
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-indigo-950/20 to-slate-900 flex items-center justify-center p-8">
+      <h3 className="text-white text-lg font-bold">{title}</h3>
     </div>
   );
 }
 
-/* ── Main Projects Section (Timeline Layout) ── */
+// ── Main Projects Section Component ──
 export default function Projects() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const subheadingRef = useRef(null);
-  const lineRef = useRef(null);
-  const nodesRef = useRef([]);
+
+  // Get correct scroll container (monitor-scroll-container on desktop, window on mobile)
+  const getScroller = () => {
+    const container = document.getElementById('monitor-scroll-container');
+    return container ? container : window;
+  };
+
+  // ── Cursor following border glow ──
+  const handleMouseMove = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.setProperty('--mouse-x', `${x}px`);
+    card.style.setProperty('--mouse-y', `${y}px`);
+  };
+
+  // ── 3D Card Tilt ──
+  const handleCardMouseMove = (e) => {
+    if (window.innerWidth < 1024) return; // Disable on tablet/mobile
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    // Relative coordinates (-0.5 to 0.5)
+    const mouseX = (e.clientX - rect.left) / width - 0.5;
+    const mouseY = (e.clientY - rect.top) / height - 0.5;
+
+    // Calculate rotation angles (max 6 degrees for subtlety)
+    const rotateX = -mouseY * 8;
+    const rotateY = mouseX * 8;
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    card.style.boxShadow = `${-rotateY * 3}px ${rotateX * 3}px 40px rgba(99, 102, 241, 0.2), 0 15px 30px rgba(0, 0, 0, 0.4)`;
+
+    const img = card.querySelector('.project-card-img');
+    if (img) {
+      img.style.transform = 'scale(1.03)';
+    }
+  };
+
+  const handleCardMouseLeave = (e) => {
+    const card = e.currentTarget;
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+    card.style.boxShadow = 'none';
+
+    const img = card.querySelector('.project-card-img');
+    if (img) {
+      img.style.transform = 'scale(1)';
+    }
+  };
 
   useEffect(() => {
-    if (!sectionRef.current) return;
-    const isMobile = window.innerWidth < 768;
-    const reduce = isMobile ? 0.5 : 1;
+    const scroller = getScroller();
 
-    /* ── Section reveal ── */
-    const sectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          sectionObserver.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    sectionObserver.observe(sectionRef.current);
-
-    /* ── Per-node card reveal via IntersectionObserver ── */
-    const nodeObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('proj-node-visible');
-            nodeObserver.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    nodesRef.current.forEach((node) => {
-      if (node) nodeObserver.observe(node);
-    });
-
-    /* ── GSAP: heading, subheading, timeline line ── */
     const ctx = gsap.context(() => {
-      // Heading
+      // 1. Header reveal
       if (headingRef.current) {
         gsap.fromTo(
           headingRef.current,
-          { opacity: 0, y: 40 * reduce },
+          { opacity: 0, y: 30 },
           {
             opacity: 1,
             y: 0,
@@ -427,19 +323,18 @@ export default function Projects() {
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
+              scroller: scroller,
               start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
+              toggleActions: 'play none none none',
             },
           }
         );
       }
 
-      // Subheading
       if (subheadingRef.current) {
         gsap.fromTo(
           subheadingRef.current,
-          { opacity: 0, y: 30 * reduce },
+          { opacity: 0, y: 25 },
           {
             opacity: 1,
             y: 0,
@@ -448,38 +343,107 @@ export default function Projects() {
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
+              scroller: scroller,
               start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
+              toggleActions: 'play none none none',
             },
           }
         );
       }
 
-      // Timeline line draw via scrub
-      if (lineRef.current) {
-        gsap.fromTo(
-          lineRef.current,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 70%',
-              end: 'bottom 30%',
-              scrub: 0.5,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
+      // 2. Animate each project item
+      projects.forEach((project) => {
+        const item = document.getElementById(`project-item-${project.id}`);
+        if (!item) return;
+
+        const card = item.querySelector('.project-showcase-card');
+        const info = item.querySelector('.project-showcase-info');
+        const bullets = item.querySelectorAll('.project-showcase-bullet');
+        const chips = item.querySelectorAll('.project-showcase-chip');
+        const buttons = item.querySelectorAll('.project-showcase-btn');
+        const innerWrapper = item.querySelector('.project-inner-wrapper');
+
+        // Check window width dynamically inside ScrollTrigger
+        const isSmallScreen = window.innerWidth < 1024;
+
+        // Entry animation
+        const entryTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: item,
+            scroller: scroller,
+            start: isSmallScreen ? 'top 85%' : 'top 80%',
+            toggleActions: 'play none none none',
+            invalidateOnRefresh: true,
+          },
+        });
+
+        if (isSmallScreen) {
+          // Responsive Mobile/Tablet Entry Animation
+          entryTl
+            .fromTo(card, 
+              { opacity: 0, y: 40 },
+              { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+            )
+            .fromTo(info,
+              { opacity: 0, y: 30 },
+              { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
+              '-=0.4'
+            )
+            .fromTo(bullets,
+              { opacity: 0, y: 10 },
+              { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: 'power2.out' },
+              '-=0.3'
+            )
+            .fromTo(chips,
+              { opacity: 0, scale: 0.8 },
+              { opacity: 1, scale: 1, stagger: 0.04, duration: 0.3, ease: 'power2.out' },
+              '-=0.3'
+            )
+            .fromTo(buttons,
+              { opacity: 0, scale: 0.95 },
+              { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' },
+              '-=0.2'
+            );
+        } else {
+          // Premium Cinematic Desktop Entry Animation
+          entryTl
+            .fromTo(card,
+              { opacity: 0, y: 100, scale: 0.9 },
+              { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+            )
+            .fromTo(info,
+              { opacity: 0, x: 80 },
+              { opacity: 1, x: 0, duration: 0.9, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+              '-=0.7'
+            )
+            .fromTo(bullets,
+              { opacity: 0, y: 15 },
+              { opacity: 1, y: 0, stagger: 0.1, duration: 0.5, ease: 'power3.out' },
+              '-=0.5'
+            )
+            .fromTo(chips,
+              { opacity: 0, scale: 0.7 },
+              { opacity: 1, scale: 1, stagger: 0.05, duration: 0.4, ease: 'back.out(1.5)' },
+              '-=0.4'
+            )
+            .fromTo(buttons,
+              { opacity: 0, scale: 0.9 },
+              { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' },
+              '-=0.3'
+            );
+
+        }
+      });
     }, sectionRef);
 
+    // Refresh triggers to ensure layout is measured accurately
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 1000);
+
     return () => {
+      clearTimeout(refreshTimer);
       ctx.revert();
-      sectionObserver.disconnect();
-      nodeObserver.disconnect();
     };
   }, []);
 
@@ -487,434 +451,230 @@ export default function Projects() {
     <section
       id="projects"
       ref={sectionRef}
-      className="section-container section-padding bg-white dark:bg-bg text-gray-900 dark:text-text projects-section reveal-section"
-      data-animate
-      style={{ overflow: 'hidden' }}
+      className="bg-transparent text-text relative w-full overflow-hidden"
+      style={{ paddingBottom: '80px' }}
     >
       <div className="section-divider"></div>
 
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="px-6">
         <h2
           ref={headingRef}
-          className="gradient-text"
-          data-animate
-          style={{
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
-            fontWeight: 700,
-            margin: '0 0 12px 0',
-          }}
+          className="gradient-text text-4xl lg:text-5xl font-bold mb-4"
+          style={{ letterSpacing: '-0.02em' }}
         >
-          Featured Projects
+          Selected Products
         </h2>
         <p
           ref={subheadingRef}
-          data-animate
-          style={{
-            color: 'var(--text-muted)',
-            fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
-            margin: 0,
-            maxWidth: '480px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
+          className="text-text-muted text-base lg:text-lg max-w-lg mx-auto"
         >
-          A selection of projects that showcase my skills
+          A curated presentation of software products, microservices, and mobile platforms engineered for production.
         </p>
       </div>
 
-      {/* Timeline container */}
-      <div className="proj-timeline" style={{ position: 'relative', maxWidth: '1100px', margin: '0 auto' }}>
-        {/* Vertical timeline line */}
-        <div
-          ref={lineRef}
-          className="proj-timeline-line"
-          data-animate
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: 0,
-            bottom: 0,
-            width: '6px',
-            transformOrigin: 'top',
-            transform: 'scaleY(0)',
-            marginLeft: '-3px',
-            borderRadius: '4px',
-          }}
-        />
+      {/* Projects Stack */}
+      <div className="w-full flex flex-col gap-32 lg:gap-0 max-w-7xl mx-auto px-6 lg:px-8">
+        {projects.map((project, idx) => {
+          const hasImages = project.images && project.images.length > 0;
+          return (
+            <div
+              key={project.id}
+              id={`project-item-${project.id}`}
+              className="project-section w-full min-h-[85vh] lg:min-h-screen flex items-center relative py-12 lg:py-20 border-b border-indigo-950/10 last:border-0"
+              style={{ contentVisibility: 'auto' }}
+            >
+              {/* Inner Wrapper for active/inactive scroll transitions */}
+              <div className="project-inner-wrapper w-full flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-20 transition-all duration-300 will-change-transform">
+                
+                {/* ── Left Column: Large Product Card (60%) ── */}
+                <div className="w-full lg:w-[60%] flex-shrink-0 z-10">
+                  <div
+                    className="project-showcase-card aspect-[16/10] w-full rounded-[24px] overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-blue-500/20 dark:border-indigo-500/20 shadow-2xl relative transition-all duration-300 ease-out cursor-none project-card-glow"
+                    onMouseMove={(e) => {
+                      handleMouseMove(e);
+                      handleCardMouseMove(e);
+                    }}
+                    onMouseLeave={handleCardMouseLeave}
+                    style={{
+                      willChange: 'transform, box-shadow',
+                    }}
+                  >
+                    {/* Inner frame wrapper simulating a clean browser window or product mockup */}
+                    <div className="w-full h-full flex flex-col">
+                      {/* Browser header bar decoration */}
+                      <div className="w-full h-8 bg-slate-100/90 dark:bg-slate-950/80 border-b border-slate-200 dark:border-white/5 px-4 flex items-center justify-between flex-shrink-0">
+                        <div className="flex gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 select-none">
+                          {project.category.toUpperCase()} // {project.title.toLowerCase()}.dev
+                        </div>
+                        <div className="w-8" />
+                      </div>
 
-        {/* Timeline nodes */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
-          {projects.map((project, i) => {
-            const isOdd = i % 2 === 0; // 0-indexed: 1st,3rd,5th → right side
-            return (
-              <div
-                key={project.id || project.title}
-                ref={(el) => (nodesRef.current[i] = el)}
-                className="proj-timeline-node"
-                data-animate
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: isOdd ? 'flex-end' : 'flex-start',
-                  position: 'relative',
-                }}
-              >
-                {/* Marker dot */}
-                <div
-                  className="proj-timeline-marker"
-                  style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: '2rem',
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '50%',
-                    border: '2px solid var(--gold)',
-                    background: 'var(--bg)',
-                    transform: 'translateX(-50%) scale(0)',
-                    zIndex: 2,
-                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease, box-shadow 0.4s ease',
-                  }}
-                />
-
-                {/* Horizontal connector line */}
-                <div
-                  className="proj-timeline-connector"
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(2rem + 7px)',
-                    height: '2px',
-                    opacity: 0,
-                    transition: 'opacity 0.4s ease 0.2s',
-                    ...(isOdd
-                      ? { left: 'calc(50% + 8px)', width: 'calc(2.5rem - 8px)' }
-                      : { right: 'calc(50% + 8px)', width: 'calc(2.5rem - 8px)' }
-                    ),
-                  }}
-                />
-
-                {/* Card */}
-                <div
-                  className={`proj-timeline-card ${isOdd ? 'proj-card-right' : 'proj-card-left'}`}
-                  style={{
-                    width: 'calc(50% - 2.5rem)',
-                  }}
-                >
-                  <MagneticWrapper>
-                    <ProjectCard project={project} />
-                  </MagneticWrapper>
+                      {/* Content Area */}
+                      <div className="w-full flex-grow relative overflow-hidden">
+                        {hasImages ? (
+                          <ImageCarousel images={project.images} title={project.title} />
+                        ) : (
+                          <ProjectGraphic projectId={project.id} title={project.title} tech={project.tech} />
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* ── Right Column: Product Explanation Panel (40%) ── */}
+                <div className="project-showcase-info w-full lg:w-[40%] flex flex-col justify-center">
+                  {/* Category Pill */}
+                  <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-indigo-400 mb-2">
+                    {project.category}
+                  </span>
+
+                  {/* Title & Tagline */}
+                  <h3 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
+                    {project.title}
+                  </h3>
+                  <p className="text-base font-medium text-blue-600/90 dark:text-indigo-200/90 leading-snug mb-5 border-l-2 border-blue-500/40 dark:border-indigo-500/40 pl-4 py-0.5">
+                    {project.tagline}
+                  </p>
+
+                  {/* Feature Bullets */}
+                  <div className="mb-6">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-white/50 mb-3">Core Features</h4>
+                    <ul className="flex flex-col gap-2.5">
+                      {project.features.map((feature, fIdx) => (
+                        <li
+                          key={fIdx}
+                          className="project-showcase-bullet flex items-start gap-3 text-sm text-text-muted leading-snug"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-indigo-500 mt-2 flex-shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.8)] dark:shadow-[0_0_8px_rgba(99,102,241,1)]" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Tech stack chips */}
+                  <div className="mb-8">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-white/50 mb-3">Tech Stack</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((t) => (
+                        <span key={t} className="project-showcase-chip tech-chip py-1.5 px-3.5 text-xs">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="project-showcase-btn flex flex-wrap gap-3.5 items-center">
+                    {project.liveUrl && (
+                      <MagneticButton
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-indigo-600 dark:to-indigo-500 text-white rounded-xl font-semibold text-sm shadow-md shadow-blue-500/10 dark:shadow-indigo-500/10 border border-blue-400/20 dark:border-indigo-400/20"
+                      >
+                        Live Demo <span className="ml-1.5 text-xs">↗</span>
+                      </MagneticButton>
+                    )}
+                    <MagneticButton
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-3 px-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/60 dark:hover:bg-slate-900 border border-slate-200 dark:border-indigo-500/20 dark:hover:border-indigo-500/40 text-slate-800 dark:text-white rounded-xl font-semibold text-sm"
+                    >
+                      GitHub Repository <span className="ml-1.5 text-xs">⟨/⟩</span>
+                    </MagneticButton>
+                  </div>
+                </div>
+
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Timeline styles */}
+      {/* Styled Scoped CSS for Showcase Page */}
       <style>{`
-        /* ── Rotating twisted cable timeline line ── */
-        .proj-timeline-line {
-          background: repeating-linear-gradient(
-            45deg,
-            #8a6f27 0px,
-            #8a6f27 6px,
-            var(--gold) 6px,
-            var(--gold) 12px,
-            var(--gold-light) 12px,
-            var(--gold-light) 18px,
-            var(--gold) 18px,
-            var(--gold) 24px
-          );
-          background-size: 34px 34px;
-          animation: twist-scroll 1.2s linear infinite;
-          box-shadow: 0 0 12px rgba(212, 175, 55, 0.45), 0 0 20px rgba(212, 175, 55, 0.2);
-        }
-
-        @keyframes twist-scroll {
-          from {
-            background-position-y: 0px;
-          }
-          to {
-            background-position-y: 34px;
-          }
-        }
-
-        /* ── Glowing Flowing Horizontal Connector ── */
-        .proj-timeline-connector {
-          background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
-          background-size: 200% 100%;
-          animation: connector-flow 1.5s linear infinite;
-          box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
-        }
-
-        @keyframes connector-flow {
-          0% {
-            background-position: 200% 0;
-          }
-          100% {
-            background-position: 0 0;
-          }
-        }
-
-        /* ── Card slide-in transitions ── */
-        .proj-timeline-card {
-          opacity: 0;
-          transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
-                      transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-          will-change: opacity, transform;
-        }
-
-        .proj-card-right {
-          transform: translateX(80px);
-        }
-
-        .proj-card-left {
-          transform: translateX(-80px);
-        }
-
-        /* ── Visible state triggered per-node ── */
-        .proj-node-visible .proj-timeline-card {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .proj-node-visible .proj-timeline-marker {
-          transform: translateX(-50%) scale(1) !important;
-          background: var(--gold) !important;
-          box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.3);
-          animation: proj-dot-pulse 2s ease-in-out infinite;
-        }
-
-        .proj-node-visible .proj-timeline-connector {
-          opacity: 1 !important;
-        }
-
-        @keyframes proj-dot-pulse {
-          0%, 100% {
-            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.3);
-          }
-          50% {
-            box-shadow: 0 0 0 8px rgba(212, 175, 55, 0), 0 0 20px rgba(212, 175, 55, 0.1);
-          }
-        }
-
-        /* ── Flip card styles ── */
-        .flip-card {
-          perspective: 1200px;
-          width: 100%;
-          cursor: pointer;
-        }
-
-        .flip-card-inner {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-          transform-style: preserve-3d;
-        }
-
-        .flip-card:hover .flip-card-inner {
-          transform: rotateY(180deg);
-        }
-
-        .flip-card-front,
-        .flip-card-back {
+        /* Custom mouse-following glow styling */
+        .project-card-glow::before {
+          content: '';
           position: absolute;
-          width: 100%;
-          height: 100%;
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
+          inset: -1px;
+          border-radius: 24px;
+          padding: 1px;
+          background: radial-gradient(
+            350px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+            rgba(59, 130, 246, 0.4),
+            rgba(96, 165, 250, 0.1) 40%,
+            transparent 60%
+          );
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.4s ease;
+          z-index: 20;
         }
 
-        .flip-card-back {
-          transform: rotateY(180deg);
+        html.dark .project-card-glow::before {
+          background: radial-gradient(
+            350px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+            rgba(99, 102, 241, 0.45),
+            rgba(129, 140, 248, 0.1) 40%,
+            transparent 60%
+          );
         }
 
-        /* ── Responsive: mobile < 768px ── */
-        @media (max-width: 768px) {
-          .proj-timeline-line {
-            left: 1rem !important;
-            margin-left: 0 !important;
-          }
-
-          .proj-timeline-node {
-            justify-content: flex-start !important;
-            padding-left: 3rem;
-          }
-
-          .proj-timeline-node .proj-timeline-card {
-            width: 100% !important;
-          }
-
-          .proj-card-right,
-          .proj-card-left {
-            transform: translateX(80px);
-          }
-
-          .proj-node-visible .proj-card-right,
-          .proj-node-visible .proj-card-left {
-            transform: translateX(0);
-          }
-
-          .proj-timeline-marker {
-            left: 1rem !important;
-          }
-
-          .proj-timeline-connector {
-            left: calc(1rem + 8px) !important;
-            right: auto !important;
-            width: calc(2rem - 8px) !important;
-          }
+        .project-card-glow:hover::before {
+          opacity: 1;
         }
 
-        /* ── Continuous sliding carousel with 3s delay & 0.8s smooth transition ── */
-        .proj-carousel-track:hover {
-          animation-play-state: paused !important;
+        /* Glassmorphic border glow fallback default */
+        .project-showcase-card {
+          box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.15), 0 0 50px 0 rgba(59, 130, 246, 0.02);
         }
 
-        @keyframes proj-slide-5 {
-          0% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          15.79% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          20% {
-            transform: translateX(-10%);
-            animation-timing-function: ease-in-out;
-          }
-          35.79% {
-            transform: translateX(-10%);
-            animation-timing-function: ease-in-out;
-          }
-          40% {
-            transform: translateX(-20%);
-            animation-timing-function: ease-in-out;
-          }
-          55.79% {
-            transform: translateX(-20%);
-            animation-timing-function: ease-in-out;
-          }
-          60% {
-            transform: translateX(-30%);
-            animation-timing-function: ease-in-out;
-          }
-          75.79% {
-            transform: translateX(-30%);
-            animation-timing-function: ease-in-out;
-          }
-          80% {
-            transform: translateX(-40%);
-            animation-timing-function: ease-in-out;
-          }
-          95.79% {
-            transform: translateX(-40%);
-            animation-timing-function: ease-in-out;
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+        html.dark .project-showcase-card {
+          box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.5), 0 0 50px 0 rgba(99, 102, 241, 0.02);
         }
 
-        @keyframes proj-slide-4 {
-          0% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          19.74% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          25% {
-            transform: translateX(-12.5%);
-            animation-timing-function: ease-in-out;
-          }
-          44.74% {
-            transform: translateX(-12.5%);
-            animation-timing-function: ease-in-out;
-          }
-          50% {
-            transform: translateX(-25%);
-            animation-timing-function: ease-in-out;
-          }
-          69.74% {
-            transform: translateX(-25%);
-            animation-timing-function: ease-in-out;
-          }
-          75% {
-            transform: translateX(-37.5%);
-            animation-timing-function: ease-in-out;
-          }
-          94.74% {
-            transform: translateX(-37.5%);
-            animation-timing-function: ease-in-out;
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+        /* Tech chip colors adapt */
+        .tech-chip {
+          color: var(--gold);
+          background: rgba(59, 130, 246, 0.08) !important;
+          border: 1px solid rgba(59, 130, 246, 0.18) !important;
         }
 
-        @keyframes proj-slide-3 {
-          0% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          26.31% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          33.33% {
-            transform: translateX(-16.67%);
-            animation-timing-function: ease-in-out;
-          }
-          59.64% {
-            transform: translateX(-16.67%);
-            animation-timing-function: ease-in-out;
-          }
-          66.67% {
-            transform: translateX(-33.33%);
-            animation-timing-function: ease-in-out;
-          }
-          92.98% {
-            transform: translateX(-33.33%);
-            animation-timing-function: ease-in-out;
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+        html.dark .tech-chip {
+          background: rgba(99, 102, 241, 0.08) !important;
+          border: 1px solid rgba(99, 102, 241, 0.18) !important;
         }
 
-        @keyframes proj-slide-2 {
-          0% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          39.47% {
-            transform: translateX(0);
-            animation-timing-function: ease-in-out;
-          }
-          50% {
-            transform: translateX(-25%);
-            animation-timing-function: ease-in-out;
-          }
-          89.47% {
-            transform: translateX(-25%);
-            animation-timing-function: ease-in-out;
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+        /* 3D tilt smooth return transition */
+        .project-showcase-card {
+          transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        @keyframes proj-slide-1 {
-          0% {
-            transform: translateX(0);
+        /* Smooth hardware-accelerated transitions */
+        .project-inner-wrapper {
+          will-change: transform, opacity, filter;
+          transform: translate3d(0, 0, 0);
+        }
+
+        /* Responsive styling tweak: stack grid items on mobile nicely */
+        @media (max-width: 1023px) {
+          .project-section {
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
           }
-          100% {
-            transform: translateX(0);
+          .project-section:last-child {
+            border-bottom: none;
           }
         }
       `}</style>

@@ -76,18 +76,18 @@ const CustomCursor = () => {
     checkHoverTargets();
 
     if (isHovering.current) {
-      ring.style.width = '60px';
-      ring.style.height = '60px';
-      ring.style.backgroundColor = 'rgba(255, 223, 122, 0.3)';
-      ring.style.borderColor = '#ffdf7a';
-      ring.style.transform = `translate(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px)`;
-      dot.style.transform = `translate(${mousePos.current.x - 6}px, ${mousePos.current.y - 6}px) scale(0.5)`;
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+      ring.style.borderColor = 'var(--gold-light)';
+      ring.style.transform = `translate(${ringPos.current.x - 28}px, ${ringPos.current.y - 28}px)`;
+      dot.style.transform = `translate(${mousePos.current.x - 6}px, ${mousePos.current.y - 6}px) scale(0.4)`;
     } else {
-      ring.style.width = '40px';
-      ring.style.height = '40px';
-      ring.style.backgroundColor = 'transparent';
-      ring.style.borderColor = '#d4af37';
-      ring.style.transform = `translate(${ringPos.current.x - 20}px, ${ringPos.current.y - 20}px)`;
+      ring.style.width = '32px';
+      ring.style.height = '32px';
+      ring.style.backgroundColor = 'rgba(99, 102, 241, 0.03)';
+      ring.style.borderColor = 'var(--gold)';
+      ring.style.transform = `translate(${ringPos.current.x - 16}px, ${ringPos.current.y - 16}px)`;
     }
 
     rafId.current = requestAnimationFrame(animate);
@@ -132,7 +132,7 @@ const CustomCursor = () => {
           width: '12px',
           height: '12px',
           borderRadius: '50%',
-          backgroundColor: '#d4af37',
+          backgroundColor: 'var(--gold)',
           pointerEvents: 'none',
           zIndex: 9999,
           mixBlendMode: 'difference',
@@ -147,17 +147,18 @@ const CustomCursor = () => {
           position: 'fixed',
           top: 0,
           left: 0,
-          width: '40px',
-          height: '40px',
+          width: '32px',
+          height: '32px',
           borderRadius: '50%',
-          border: '2px solid #d4af37',
-          backgroundColor: 'transparent',
+          border: '1.5px solid var(--gold)',
+          backgroundColor: 'rgba(99, 102, 241, 0.03)',
           pointerEvents: 'none',
           zIndex: 9998,
           mixBlendMode: 'difference',
           opacity: 0,
           transition: 'width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease, opacity 0.3s ease',
           willChange: 'transform',
+          boxShadow: '0 0 8px rgba(99, 102, 241, 0.1)',
         }}
       />
     </>

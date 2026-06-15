@@ -102,7 +102,8 @@ function TiltCard() {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            imageRendering: 'auto',
           }}
         />
 
@@ -120,16 +121,9 @@ function TiltCard() {
    Animated Heading
    ────────────────────────────────────────────── */
 function AnimatedHeading({ text, className }) {
-  const words = text.split(' ');
-
   return (
     <h2 className={className}>
-      {words.map((word, i) => (
-        <span key={i} className="about__heading-word" style={{ transitionDelay: `${i * 0.1}s` }}>
-          {word}
-          {i < words.length - 1 ? '\u00A0' : ''}
-        </span>
-      ))}
+      {text}
     </h2>
   );
 }
@@ -144,8 +138,8 @@ export default function About() {
 
   useEffect(() => {
     if (!sectionRef.current) return;
-    const isMobile = window.innerWidth < 768;
-    const reduce = isMobile ? 0.5 : 1;
+
+    const scrollContainer = document.getElementById('monitor-scroll-container');
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -154,96 +148,21 @@ export default function About() {
           observer.unobserve(entry.target)
         }
       },
-      { threshold: 0.15 }
+      { 
+        root: scrollContainer || null,
+        threshold: 0.15 
+      }
     )
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    const ctx = gsap.context(() => {
-
-      // Left side (photo): slide from left
-      if (leftColRef.current) {
-        gsap.set(leftColRef.current, { willChange: 'transform' });
-        gsap.fromTo(
-          leftColRef.current,
-          { opacity: 0, x: -80 * reduce },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 85%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-            onComplete: () => {
-              gsap.set(leftColRef.current, { willChange: 'auto' });
-            },
-          }
-        );
-      }
-
-      // Right side (text): slide from right
-      if (rightColRef.current) {
-        gsap.set(rightColRef.current, { willChange: 'transform' });
-        gsap.fromTo(
-          rightColRef.current,
-          { opacity: 0, x: 80 * reduce },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            delay: 0.15,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 85%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-            onComplete: () => {
-              gsap.set(rightColRef.current, { willChange: 'auto' });
-            },
-          }
-        );
-
-        // Each text line inside right
-        const textElements = rightColRef.current.querySelectorAll('.about__heading-word, .about__bio-paragraph, .about__cta');
-        if (textElements.length) {
-          gsap.fromTo(
-            textElements,
-            { opacity: 0, y: 20 * reduce },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.1,
-              delay: 0.3,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: 'top 85%',
-                once: true,
-                invalidateOnRefresh: true,
-              },
-            }
-          );
-        }
-      }
-    }, sectionRef);
+    observer.observe(sectionRef.current)
 
     return () => {
-      ctx.revert();
       observer.disconnect();
     };
   }, []);
 
   return (
-    <section className="about section-padding bg-white dark:bg-bg text-gray-900 dark:text-text about-section reveal-section" id="about" ref={sectionRef}>
+    <section className="about section-padding bg-transparent text-text about-section reveal-about" id="about" ref={sectionRef}>
       <div className="section-divider"></div>
       <div className="section-container">
         <div className="about__grid">
@@ -280,6 +199,69 @@ export default function About() {
 
       {/* Inline styles */}
       <style>{`
+        .reveal-about {
+          opacity: 0;
+          transform: translateY(40px);
+          transition: opacity 0.7s ease, transform 0.7s ease;
+          margin-top: 80px;
+        }
+
+        @media (min-width: 1024px) {
+          .reveal-about {
+            margin-top: 120px;
+          }
+        }
+
+        .reveal-about.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* Scoped child elements slide-in on is-visible */
+        .reveal-about .about__left {
+          opacity: 0;
+          transform: translateX(-40px);
+          transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .reveal-about.is-visible .about__left {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .reveal-about .about__right {
+          opacity: 0;
+          transform: translateX(40px);
+          transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+          transition-delay: 0.15s;
+        }
+        .reveal-about.is-visible .about__right {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .reveal-about .about__heading,
+        .reveal-about .about__bio-paragraph,
+        .reveal-about .about__cta {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .reveal-about.is-visible .about__heading {
+          opacity: 1;
+          transform: translateY(0);
+          transition-delay: 0.3s;
+        }
+        .reveal-about.is-visible .about__bio-paragraph {
+          opacity: 1;
+          transform: translateY(0);
+          transition-delay: 0.4s;
+        }
+        .reveal-about.is-visible .about__cta {
+          opacity: 1;
+          transform: translateY(0);
+          transition-delay: 0.5s;
+        }
+
         .about {
           position: relative;
           background: transparent;
@@ -315,11 +297,11 @@ export default function About() {
           transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           will-change: transform;
           cursor: pointer;
-          border: 1px solid var(--border, rgba(212, 175, 55, 0.2));
+          border: 1px solid var(--border, rgba(99, 102, 241, 0.2));
         }
 
         .about__tilt-card:hover {
-          box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+          box-shadow: 0 0 30px rgba(99, 102, 241, 0.25);
         }
 
         .about__photo-placeholder {
@@ -395,7 +377,7 @@ export default function About() {
         }
 
         .gradient-text {
-          background: linear-gradient(135deg, var(--gold, #d4af37), var(--gold-light, #ffdf7a));
+          background: linear-gradient(135deg, var(--gold, #6366f1), var(--gold-light, #818cf8));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -431,9 +413,9 @@ export default function About() {
           padding: 6px 16px;
           font-size: 0.8125rem;
           font-weight: 500;
-          color: var(--gold, #d4af37);
-          background: var(--surface, #14130d);
-          border: 1px solid var(--border, rgba(212, 175, 55, 0.2));
+          color: var(--gold, #6366f1);
+          background: var(--surface, #111827);
+          border: 1px solid var(--border, rgba(99, 102, 241, 0.2));
           border-radius: 9999px;
           white-space: nowrap;
           transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -443,9 +425,9 @@ export default function About() {
         }
 
         .tech-chip:hover {
-          border-color: var(--gold-light, #ffdf7a);
-          background: rgba(212, 175, 55, 0.15);
-          box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+          border-color: var(--gold-light, #818cf8);
+          background: rgba(99, 102, 241, 0.15);
+          box-shadow: 0 0 12px rgba(99, 102, 241, 0.15);
         }
 
         /* ── CTA button ── */
@@ -461,7 +443,7 @@ export default function About() {
           font-size: 1rem;
           font-weight: 600;
           color: #ffffff;
-          background: linear-gradient(135deg, var(--gold, #d4af37), var(--gold-light, #ffdf7a));
+          background: linear-gradient(135deg, var(--gold, #6366f1), var(--gold-light, #818cf8));
           border: none;
           border-radius: 9999px;
           text-decoration: none;
@@ -473,7 +455,7 @@ export default function About() {
 
         .about__cv-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
         }
 
         .about__cv-button:active {

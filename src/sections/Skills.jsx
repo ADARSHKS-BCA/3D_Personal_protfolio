@@ -2,57 +2,56 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { barSkills } from '../data/skills';
 
-// Books on the shelf details with updated colors, heights (~60px to 84px), and widths (45px to 55px)
 const shelfBooks = [
   {
     name: 'Git',
-    height: '76px',
-    width: '48px',
-    color: '#dc2626', // Red
+    width: '46px',
+    color: '#dc2626',
     description: 'A distributed version control system designed to handle everything from small to very large projects with speed and efficiency. It is the industry standard for tracking code changes, branch management, and collaborative software development.'
   },
   {
     name: 'Docker',
-    height: '82px',
-    width: '52px',
-    color: '#2563eb', // Blue
+    width: '50px',
+    color: '#2563eb',
     description: 'A platform designed to help developers build, share, and run applications inside lightweight containers. By containerizing software, it ensures consistency across different development, testing, and production environments.'
   },
   {
     name: 'MongoDB',
-    height: '78px',
-    width: '46px',
-    color: '#f97316', // Orange
+    width: '44px',
+    color: '#f97316',
     description: 'A source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas for high scalability and flexible data structures.'
   },
   {
     name: 'REST APIs',
-    height: '80px',
-    width: '48px',
-    color: '#8b5cf6', // Purple
+    width: '46px',
+    color: '#8b5cf6',
     description: 'Representational State Transfer application programming interfaces that enable communication between different systems over HTTP. They rely on standard HTTP methods like GET, POST, PUT, and DELETE to manage resource states efficiently.'
   },
   {
     name: 'Node.js',
-    height: '84px',
-    width: '50px',
-    color: '#0d9488', // Teal
+    width: '48px',
+    color: '#0d9488',
     description: 'A cross-platform, open-source JavaScript runtime environment that executes JavaScript code outside a web browser. It uses an asynchronous event-driven model to build highly scalable and performant network applications.'
   },
   {
     name: 'Django',
-    height: '79px',
-    width: '47px',
-    color: '#ff4500', // Orange-red
+    width: '46px',
+    color: '#16a34a',
     description: 'A high-level Python web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of web development, so you can focus on writing your app.'
   },
   {
     name: 'PostgreSQL',
-    height: '81px',
-    width: '51px',
-    color: '#1e3a8a', // Dark Blue
+    width: '50px',
+    color: '#1d4ed8',
     description: 'A powerful, open-source object-relational database system with over 30 years of active development. It has earned a strong reputation for reliability, feature robustness, and performance in handling complex data workloads.'
   }
+];
+
+// Row assignments for the 3-row shelf
+const shelfRows = [
+  shelfBooks.slice(0, 3),  // Row 1: Git, Docker, MongoDB
+  shelfBooks.slice(3, 5),  // Row 2: REST APIs, Node.js
+  shelfBooks.slice(5, 7),  // Row 3: Django, PostgreSQL
 ];
 
 export default function Skills() {
@@ -61,7 +60,6 @@ export default function Skills() {
   const [selectedBook, setSelectedBook] = useState(null);
   const [isAnimated, setIsAnimated] = useState(false);
 
-  // Trigger skill bar animation when section enters viewport
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -70,11 +68,9 @@ export default function Skills() {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -82,290 +78,285 @@ export default function Skills() {
     <section
       id="skills"
       ref={sectionRef}
-      className="relative w-full py-24 md:py-32 overflow-hidden flex flex-col items-center justify-center text-white"
+      className="skills-section relative w-full overflow-hidden flex flex-col items-center text-slate-100"
       style={{
-        background: 'radial-gradient(circle at 50% 50%, #03050b 0%, #000000 100%)',
-        borderTop: '1px solid rgba(212, 175, 55, 0.08)',
-        borderBottom: '1px solid rgba(212, 175, 55, 0.08)'
+        background: 'var(--bg)',
+        borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
+        paddingTop: '60px',
+        paddingBottom: '60px',
+        zIndex: selectedBook ? 60 : 10,
       }}
     >
-      <div className="section-divider"></div>
+      <div className="section-divider" />
 
-      {/* Gold Subtitle and White Heading */}
-      <div className="section-container relative z-10 w-full mb-16 text-center">
-        <h2 
-          className="tracking-widest uppercase text-xs md:text-sm font-bold mb-2"
-          style={{ color: 'var(--gold)' }}
+      {/* Heading */}
+      <div className="section-container relative z-10 w-full mb-8 text-center">
+        <h2
+          className="tracking-widest uppercase font-bold mb-1"
+          style={{ color: 'var(--gold)', fontSize: 'clamp(9px, 1vw, 13px)' }}
         >
           ABILITIES &amp; EXPERTISE
         </h2>
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mt-1 text-white">
+        <h1
+          className="font-extrabold tracking-tight text-slate-100"
+          style={{ fontSize: 'clamp(20px, 3.5vw, 52px)', lineHeight: 1.15 }}
+        >
           Skills &amp; Expertise
         </h1>
-        <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-600 mx-auto mt-6 rounded-full" />
+        <div className="w-20 h-[3px] bg-gradient-to-r from-[#6366f1] to-[#818cf8] mx-auto mt-4 rounded-full" />
       </div>
 
-      {/* Content Layout Grid */}
-      <div className="section-container relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-        
-        {/* Left Column: Interactive Bookshelf with Sliding Doors */}
-        <div className="lg:col-span-5 w-full flex flex-col items-center justify-center order-2 lg:order-1">
-          <div className="relative w-full max-w-[420px] h-[390px] md:h-[440px] rounded-lg overflow-hidden shadow-2xl border border-stone-900/90 bg-[#150d09]">
-            
-            {/* Shelf rows container */}
-            <div className="absolute inset-0 flex flex-col justify-between p-3 pb-4 z-10">
-              
-              {/* Row 1 (Git, Docker, MongoDB - Spaced Naturally, Rest Empty) */}
-              <div className="h-[30%] flex items-end justify-start gap-4 px-6 pb-3 relative bg-[#130b07]">
-                <div className="flex items-end gap-2.5 z-20">
-                  {shelfBooks.slice(0, 3).map((book) => (
-                    <div
-                      key={book.name}
-                      onClick={() => isDoorsOpen && setSelectedBook(book)}
-                      className={`book-spine cursor-pointer transition-all duration-300 relative rounded-t-[3px] flex items-center justify-center ${
-                        isDoorsOpen ? 'hover-lift hover:brightness-110 active:scale-95' : 'pointer-events-none'
-                      }`}
-                      style={{
-                        height: book.height,
-                        width: book.width,
-                        background: book.color,
-                        borderLeft: '2.5px solid rgba(255, 255, 255, 0.18)',
-                        borderRight: '2.5px solid rgba(0, 0, 0, 0.35)',
-                        boxShadow: '2px 0 6px rgba(0, 0, 0, 0.65)'
-                      }}
-                    >
-                      <span className="book-title-text select-none text-[10px] md:text-[11px] font-bold text-white tracking-widest uppercase">
-                        {book.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                {/* Wooden ledge / plank */}
-                <div className="absolute bottom-0 inset-x-0 h-3 bg-gradient-to-b from-[#3a251d] to-[#1e130f] border-t border-[#4f3328] shadow-[0_2px_4px_rgba(0,0,0,0.8)] z-10" />
-              </div>
+      {/* Two-column layout */}
+      <div className="section-container relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
 
-              {/* Row 2 (REST APIs, Node.js - Left Aligned, Rest Empty) */}
-              <div className="h-[30%] flex items-end justify-start gap-4 px-6 pb-3 relative bg-[#130b07]">
-                <div className="flex items-end gap-2.5 z-20">
-                  {shelfBooks.slice(3, 5).map((book) => (
-                    <div
-                      key={book.name}
-                      onClick={() => isDoorsOpen && setSelectedBook(book)}
-                      className={`book-spine cursor-pointer transition-all duration-300 relative rounded-t-[3px] flex items-center justify-center ${
-                        isDoorsOpen ? 'hover-lift hover:brightness-110 active:scale-95' : 'pointer-events-none'
-                      }`}
-                      style={{
-                        height: book.height,
-                        width: book.width,
-                        background: book.color,
-                        borderLeft: '2.5px solid rgba(255, 255, 255, 0.18)',
-                        borderRight: '2.5px solid rgba(0, 0, 0, 0.35)',
-                        boxShadow: '2px 0 6px rgba(0, 0, 0, 0.65)'
-                      }}
-                    >
-                      <span className="book-title-text select-none text-[10px] md:text-[11px] font-bold text-white tracking-widest uppercase">
-                        {book.name}
-                      </span>
-                    </div>
-                  ))}
+        {/* LEFT — Bookshelf */}
+        <div className="lg:col-span-5 w-full flex flex-col items-center order-2 lg:order-1">
+          {/* Shelf Container */}
+          <div
+            className="shelf-container relative w-full rounded-lg overflow-hidden shadow-2xl border border-slate-700"
+            style={{
+              maxWidth: '380px',
+              background: '#111827',
+            }}
+          >
+            {/* 3 shelf rows */}
+            <div className="flex flex-col" style={{ padding: '10px 10px 6px' }}>
+              {shelfRows.map((rowBooks, rowIdx) => (
+                <div key={rowIdx} className="shelf-row relative flex items-end gap-1.5 px-4 pt-1" style={{ height: '90px' }}>
+                  {/* Books */}
+                  <div className="flex items-end gap-1.5 z-20 relative">
+                    {rowBooks.map((book) => (
+                      <div
+                        key={book.name}
+                        onClick={() => isDoorsOpen && setSelectedBook(book)}
+                        className={`book-spine relative rounded-t-sm flex items-center justify-center transition-all duration-300 ${
+                          isDoorsOpen ? 'cursor-pointer hover-lift' : 'pointer-events-none'
+                        }`}
+                        style={{
+                          height: '72px',
+                          width: book.width,
+                          background: `linear-gradient(175deg, ${book.color}cc 0%, ${book.color} 40%, ${book.color}dd 100%)`,
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
+                          borderRight: '2px solid rgba(0,0,0,0.4)',
+                          boxShadow: `2px 0 8px rgba(0,0,0,0.4), inset 1px 0 0 rgba(255,255,255,0.08)`,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <span className="book-title-text">{book.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Wooden shelf plank */}
+                  <div
+                    className="absolute bottom-0 inset-x-0 z-10"
+                    style={{
+                      height: '10px',
+                      background: 'linear-gradient(180deg, #334155 0%, #1e293b 100%)',
+                      borderTop: '1px solid #475569',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                    }}
+                  />
                 </div>
-                {/* Wooden ledge / plank */}
-                <div className="absolute bottom-0 inset-x-0 h-3 bg-gradient-to-b from-[#3a251d] to-[#1e130f] border-t border-[#4f3328] shadow-[0_2px_4px_rgba(0,0,0,0.8)] z-10" />
-              </div>
+              ))}
 
-              {/* Row 3 (Django, PostgreSQL - Left Aligned, Rest Empty) */}
-              <div className="h-[30%] flex items-end justify-start gap-4 px-6 pb-3 relative bg-[#130b07]">
-                <div className="flex items-end gap-2.5 z-20">
-                  {shelfBooks.slice(5, 7).map((book) => (
-                    <div
-                      key={book.name}
-                      onClick={() => isDoorsOpen && setSelectedBook(book)}
-                      className={`book-spine cursor-pointer transition-all duration-300 relative rounded-t-[3px] flex items-center justify-center ${
-                        isDoorsOpen ? 'hover-lift hover:brightness-110 active:scale-95' : 'pointer-events-none'
-                      }`}
-                      style={{
-                        height: book.height,
-                        width: book.width,
-                        background: book.color,
-                        borderLeft: '2.5px solid rgba(255, 255, 255, 0.18)',
-                        borderRight: '2.5px solid rgba(0, 0, 0, 0.35)',
-                        boxShadow: '2px 0 6px rgba(0, 0, 0, 0.65)'
-                      }}
-                    >
-                      <span className="book-title-text select-none text-[10px] md:text-[11px] font-bold text-white tracking-widest uppercase">
-                        {book.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                {/* Wooden ledge / plank */}
-                <div className="absolute bottom-0 inset-x-0 h-3 bg-gradient-to-b from-[#3a251d] to-[#1e130f] border-t border-[#4f3328] shadow-[0_2px_4px_rgba(0,0,0,0.8)] z-10" />
-              </div>
+              {/* Bottom base plank */}
+              <div
+                style={{
+                  height: '14px',
+                  background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)',
+                  borderTop: '2px solid #334155',
+                  borderRadius: '0 0 6px 6px',
+                  boxShadow: '0 3px 8px rgba(0,0,0,0.15)',
+                  marginTop: '2px',
+                }}
+              />
             </div>
 
-            {/* Sliding Cabinet Door (Single panel, z-30 to fully obscure books) */}
-            <div 
+            {/* Sliding Door Overlay */}
+            <div
               onClick={() => !isDoorsOpen && setIsDoorsOpen(true)}
-              className={`absolute inset-0 z-30 cursor-pointer transition-transform duration-[900ms] ease-in-out shadow-[5px_0_15px_rgba(0,0,0,0.6)] ${
-                isDoorsOpen ? 'pointer-events-none' : ''
-              }`}
+              className="absolute inset-0 z-30 transition-transform duration-[900ms] ease-in-out"
               style={{
-                transform: isDoorsOpen ? 'translateX(-100%)' : 'translateX(0)',
-                background: 'linear-gradient(135deg, #241712 0%, #3a251d 30%, #241712 70%, #170e0a 100%)',
-                boxShadow: 'inset 0 0 25px rgba(0, 0, 0, 0.95)'
+                transform: isDoorsOpen ? 'translateX(-100%)' : 'translateX(0%)',
+                background: 'linear-gradient(160deg, #1e293b 0%, #111827 100%)',
+                borderRight: '1px solid rgba(99, 102, 241, 0.2)',
+                boxShadow: 'inset 0 0 15px rgba(0,0,0,0.05)',
+                cursor: isDoorsOpen ? 'default' : 'pointer',
+                pointerEvents: isDoorsOpen ? 'none' : 'auto',
               }}
             >
-              {/* Metallic Knob on the right side */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-yellow-300 via-amber-500 to-amber-700 border border-amber-800 shadow-md flex-shrink-0 z-40" />
+              {/* Wood grain texture lines */}
+              {[15, 30, 48, 63, 78].map((pct) => (
+                <div
+                  key={pct}
+                  className="absolute inset-y-0 pointer-events-none opacity-20"
+                  style={{
+                    left: `${pct}%`,
+                    width: '1px',
+                    background: 'linear-gradient(180deg, transparent, rgba(99, 102, 241, 0.1) 30%, rgba(99, 102, 241, 0.05) 70%, transparent)',
+                  }}
+                />
+              ))}
 
-              {/* "Click to Open" Floating Label */}
+              {/* Door knob */}
+              <div
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  background: 'radial-gradient(circle at 35% 35%, #818cf8, #6366f1 60%, #4f46e5)',
+                  border: '1px solid #4f46e5',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
+                }}
+              />
+
+              {/* Click to Open label */}
               {!isDoorsOpen && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 click-open-label px-4 py-2 bg-black/90 border border-[#d4af37]/45 text-[#d4af37] font-semibold text-xs rounded-md uppercase tracking-widest pointer-events-none select-none">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 click-open-label px-3 py-1.5 bg-[#6366f1] border border-indigo-400 text-white font-semibold rounded-md uppercase tracking-widest pointer-events-none select-none"
+                  style={{ fontSize: 'clamp(8px, 0.8vw, 11px)', whiteSpace: 'nowrap' }}
+                >
                   Click to Open
                 </div>
               )}
             </div>
           </div>
 
-          {/* Close Shelf Button */}
+          {/* Close button */}
           {isDoorsOpen && (
             <button
-              onClick={() => setIsDoorsOpen(false)}
-              className="mt-5 px-5 py-1.5 bg-stone-900 border border-[#d4af37]/35 text-[#d4af37] text-xs font-semibold rounded hover:bg-stone-850 hover:border-[#d4af37] active:scale-95 transition-all duration-200 uppercase tracking-widest z-20"
+              onClick={() => { setIsDoorsOpen(false); setSelectedBook(null); }}
+              className="mt-4 px-4 py-1.5 bg-[#6366f1] hover:bg-[#4f46e5] text-white font-semibold rounded active:scale-95 transition-all duration-200 uppercase tracking-widest"
+              style={{ fontSize: 'clamp(8px, 0.75vw, 11px)' }}
             >
               Close Cabinet
             </button>
           )}
         </div>
 
-        {/* Right Column: Skill Progress Bars */}
-        <div className="lg:col-span-7 w-full order-1 lg:order-2 flex flex-col gap-6 px-2">
-          {barSkills.map((skill, index) => {
-            return (
-              <div
-                key={skill.name}
-                className="group relative flex items-center gap-4 transition-all duration-300"
-                style={{ contentVisibility: 'auto' }}
+        {/* RIGHT — Skill bars */}
+        <div className="lg:col-span-7 w-full order-1 lg:order-2 flex flex-col" style={{ gap: 'clamp(10px, 1.2vh, 22px)' }}>
+          {barSkills.map((skill, index) => (
+            <div
+              key={skill.name}
+              className="group relative flex items-center"
+              style={{ gap: 'clamp(8px, 1vw, 16px)' }}
+            >
+              {/* Skill label */}
+              <span
+                className="flex-shrink-0 flex items-center gap-2 font-semibold tracking-wide text-slate-300 group-hover:text-white transition-colors duration-200 select-none"
+                style={{ width: 'clamp(80px, 8vw, 130px)', fontSize: 'clamp(10px, 1vw, 14px)' }}
               >
-                {/* Fixed-width Skill Name & Icon */}
-                <span className="w-28 md:w-32 flex-shrink-0 flex items-center gap-2.5 text-sm md:text-base font-semibold tracking-wide text-gray-300 group-hover:text-white transition-colors duration-200 text-left select-none">
-                  <span className="text-base md:text-lg">{skill.icon}</span>
-                  <span>{skill.name}</span>
-                </span>
+                <span style={{ fontSize: 'clamp(12px, 1.2vw, 18px)' }}>{skill.icon}</span>
+                <span>{skill.name}</span>
+              </span>
 
-                {/* Progress Bar Track */}
-                <div className="relative flex-grow h-2.5 bg-[#1a2035] rounded-full overflow-hidden border border-white/5 shadow-inner">
-                  {/* Glowing Fill Bar */}
-                  <div
-                    className="h-full rounded-full transition-all duration-[1200ms] ease-out"
-                    style={{
-                      width: isAnimated ? `${skill.proficiency}%` : '0%',
-                      background: `linear-gradient(90deg, ${skill.color}88, ${skill.color})`,
-                      boxShadow: `0 0 6px ${skill.color}33`,
-                      transitionDelay: `${index * 0.05}s`
-                    }}
-                  />
-                </div>
-
-                {/* Percentage Display */}
-                <span
-                  className="w-12 flex-shrink-0 text-right text-xs md:text-sm font-bold font-mono transition-all duration-300 text-gray-400 group-hover:text-white"
-                >
-                  {skill.proficiency}%
-                </span>
+              {/* Progress track */}
+              <div
+                className="relative flex-grow rounded-full overflow-hidden border border-white/5"
+                style={{ height: 'clamp(6px, 0.7vh, 10px)', background: '#121825', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8)' }}
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-[1100ms] ease-out"
+                  style={{
+                    width: isAnimated ? `${skill.proficiency}%` : '0%',
+                    background: `linear-gradient(90deg, ${skill.color}70, ${skill.color})`,
+                    boxShadow: `0 0 8px ${skill.color}33`,
+                    transitionDelay: `${index * 60}ms`,
+                  }}
+                />
               </div>
-            );
-          })}
+            </div>
+          ))}
+
+          {/* Caption */}
+          <p className="mt-2 text-slate-400 select-none" style={{ fontSize: 'clamp(8px, 0.7vw, 11px)' }}>
+            Proficiency levels based on hands-on project experience.
+          </p>
         </div>
       </div>
 
-      {/* Book details modal popup */}
+      {/* Book Details Modal */}
       {selectedBook && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm transition-opacity duration-300">
-          <div 
-            className="relative w-full max-w-[450px] bg-stone-900 border border-[#d4af37]/30 rounded-xl p-6 md:p-8 shadow-2xl animate-modal-in"
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(6px)' }}
+          onClick={() => setSelectedBook(null)}
+        >
+          <div
+            className="relative w-full animate-modal-in"
             style={{
-              background: 'linear-gradient(135deg, #1b1612 0%, #0d0a08 100%)'
+              maxWidth: '420px',
+              background: 'linear-gradient(140deg, var(--surface) 0%, var(--bg) 100%)',
+              border: '1px solid rgba(99,102,241,0.3)',
+              borderRadius: '14px',
+              padding: 'clamp(18px, 3vw, 36px)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.8)',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Top gold accent line */}
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
-            
-            <h3 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-4 flex items-center gap-3">
-              <span className="inline-block w-3 h-7 rounded-sm" style={{ background: selectedBook.color }} />
+            <div className="absolute top-0 inset-x-0 h-[2px] rounded-t-[14px]" style={{ background: `linear-gradient(90deg, transparent, ${selectedBook.color}, transparent)` }} />
+            <h3 className="text-xl font-extrabold text-white mb-3 flex items-center gap-3">
+              <span className="inline-block w-2.5 h-6 rounded-sm" style={{ background: selectedBook.color }} />
               {selectedBook.name}
             </h3>
-            
-            <p className="text-gray-300 leading-relaxed text-sm md:text-base mb-6 font-medium">
-              {selectedBook.description}
-            </p>
-            
+            <p className="text-slate-300 leading-relaxed mb-5 text-sm">{selectedBook.description}</p>
             <div className="flex justify-end">
               <button
                 onClick={() => setSelectedBook(null)}
-                className="px-6 py-2 bg-stone-950 border border-[#d4af37]/40 text-[#d4af37] text-xs font-semibold rounded hover:bg-stone-900 hover:border-[#d4af37] transition-colors duration-200 uppercase tracking-widest"
+                className="px-5 py-1.5 text-[#f1f5f9] border border-[#6366f1]/40 rounded hover:border-[#6366f1] bg-[#111827]/80 transition-colors duration-200 uppercase tracking-widest font-semibold text-[10px]"
               >
-                Close Description
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Component Specific CSS Styles */}
+      {/* Styles */}
       <style>{`
-        /* Vertical writing-mode for book spines */
-        .book-spine {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
         .book-title-text {
           writing-mode: vertical-rl;
           transform: rotate(180deg);
-          text-align: center;
-          font-size: 10.5px;
+          font-size: clamp(7px, 0.65vw, 10px);
           font-weight: 700;
-          letter-spacing: 0.05em;
-          color: #ffffff;
+          letter-spacing: 0.06em;
+          color: rgba(255,255,255,0.92);
           user-select: none;
           white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-height: 68px;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.6);
         }
-        /* Hover lift effect for books - only enabled when doors are open */
         .hover-lift:hover {
-          transform: translateY(-12px) rotate(-1.5deg);
-          box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.85);
+          transform: translateY(-10px) rotate(-1.5deg);
+          box-shadow: 6px 8px 16px rgba(0,0,0,0.7) !important;
+          brightness: 1.1;
+          z-index: 5;
         }
-        /* Click to open text pulse animation */
         .click-open-label {
           animation: click-open-pulse 2.2s ease-in-out infinite;
         }
         @keyframes click-open-pulse {
           0%, 100% {
             transform: translate(-50%, -50%) scale(1);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4), inset 0 0 5px rgba(212, 175, 55, 0.2);
-            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 8px rgba(99,102,241,0.35), inset 0 0 4px rgba(255,255,255,0.15);
+            border-color: rgba(99,102,241,0.4);
           }
           50% {
-            transform: translate(-50%, -50%) scale(1.06);
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.75), inset 0 0 10px rgba(212, 175, 55, 0.4);
-            border-color: rgba(212, 175, 55, 0.85);
-            color: #ffdf7a;
+            transform: translate(-50%, -50%) scale(1.07);
+            box-shadow: 0 0 22px rgba(99,102,241,0.75), inset 0 0 9px rgba(255,255,255,0.35);
+            border-color: rgba(99,102,241,0.85);
+            color: #ffffff;
           }
         }
-        /* Modal entrance animation */
         .animate-modal-in {
-          animation: modal-zoom-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: modal-zoom-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         @keyframes modal-zoom-in {
-          from {
-            opacity: 0;
-            transform: scale(0.92);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; transform: scale(0.9); }
+          to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </section>

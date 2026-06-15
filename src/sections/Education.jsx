@@ -97,7 +97,7 @@ export default function Education() {
   return (
     <section
       id="education"
-      className="section-container section-padding bg-gray-50 dark:bg-bg text-gray-900 dark:text-text education-section reveal-section"
+      className="section-container section-padding bg-transparent text-text education-section reveal-section"
       ref={sectionRef}
       data-animate
       style={{ overflow: 'hidden' }}
@@ -214,7 +214,8 @@ export default function Education() {
                       display: 'inline-block',
                       padding: '0.2rem 0.75rem',
                       borderRadius: '9999px',
-                      background: 'rgba(212, 175, 55, 0.15)',
+                      background: 'rgba(99, 102, 241, 0.1)',
+                      border: '1px solid rgba(99, 102, 241, 0.2)',
                       color: 'var(--gold-light)',
                       fontSize: '0.8rem',
                       fontWeight: 500,
@@ -280,7 +281,7 @@ export default function Education() {
         .edu-node-visible .edu-timeline-marker {
           transform: translateX(-50%) scale(1) !important;
           background: var(--gold) !important;
-          box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25), 0 0 16px rgba(99, 102, 241, 0.3);
           animation: edu-dot-pulse 2s ease-in-out infinite;
         }
 
@@ -290,10 +291,10 @@ export default function Education() {
 
         @keyframes edu-dot-pulse {
           0%, 100% {
-            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25), 0 0 16px rgba(99, 102, 241, 0.3);
           }
           50% {
-            box-shadow: 0 0 0 8px rgba(212, 175, 55, 0), 0 0 20px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 0 8px rgba(99, 102, 241, 0), 0 0 20px rgba(99, 102, 241, 0.1);
           }
         }
 

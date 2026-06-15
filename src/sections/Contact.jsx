@@ -210,12 +210,12 @@ export default function Contact() {
   };
 
   const handleFocus = (e) => {
-    e.target.style.borderColor = '#ffdf7a';
-    e.target.style.boxShadow = '0 0 0 3px rgba(212,175,55,0.15)';
+    e.target.style.borderColor = 'var(--gold-light)';
+    e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.25)';
   };
 
   const handleBlur = (e) => {
-    e.target.style.borderColor = 'rgba(212,175,55,0.2)';
+    e.target.style.borderColor = 'rgba(99, 102, 241, 0.2)';
     e.target.style.boxShadow = 'none';
   };
 
@@ -262,7 +262,7 @@ export default function Contact() {
               <div key={link.label} className="social-card-item" data-animate>
                 <MagneticButton as="a" href={link.href} target="_blank" rel="noopener noreferrer" style={{ width: '100%' }}>
                   <div
-                    className="glass-card"
+                    className="glass-card glass-card-hover"
                     style={{
                       padding: '1rem',
                       display: 'flex',
@@ -271,8 +271,8 @@ export default function Contact() {
                       gap: '0.75rem',
                       borderRadius: '0.75rem',
                       cursor: 'pointer',
-                      background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.85)',
-                      boxShadow: isDark ? 'none' : '0 4px 12px rgba(212, 175, 55, 0.04)',
+                      background: 'rgba(17, 24, 39, 0.65)',
+                      border: '1px solid rgba(99, 102, 241, 0.15)',
                     }}
                   >
                     <span style={{ fontSize: '1.25rem' }}>{link.icon}</span>
@@ -290,11 +290,11 @@ export default function Contact() {
             ref={formCardRef}
             className={`glass-card form-card ${shouldShake ? 'shake-animation' : ''}`}
             style={{
-              background: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)',
+              background: 'rgba(17, 24, 39, 0.75)',
               border: errorState 
                 ? '1px solid #dc2626' 
-                : (isDark ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid rgba(212, 175, 55, 0.3)'),
-              boxShadow: isDark ? 'none' : '0 8px 32px rgba(212, 175, 55, 0.08)',
+                : '1px solid rgba(99, 102, 241, 0.2)',
+              boxShadow: '0 8px 32px 0 rgba(99, 102, 241, 0.05)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               transition: 'border 0.3s ease, background 0.3s ease',
@@ -519,7 +519,7 @@ export default function Contact() {
 
         .contact-subtext {
           font-size: 16px !important;
-          color: rgba(255,255,255,0.6) !important;
+          color: var(--text-muted) !important;
           line-height: 1.7 !important;
           max-width: 380px !important;
           margin-bottom: 0 !important;
@@ -559,7 +559,7 @@ export default function Contact() {
 
         .form-field-label {
           font-size: 13px !important;
-          color: rgba(255,255,255,0.5) !important;
+          color: var(--text-muted) !important;
           margin-bottom: 6px !important;
           letter-spacing: 0.05em !important;
           text-transform: uppercase !important;
@@ -572,10 +572,10 @@ export default function Contact() {
           height: 52px !important;
           width: 100%;
           padding: 14px 16px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(212,175,55,0.2);
+          background: var(--surface);
+          border: 1px solid rgba(99, 102, 241, 0.2);
           border-radius: 8px;
-          color: #ffffff;
+          color: var(--text);
           font-size: 14px;
           outline: none;
           transition: all 0.2s ease;
@@ -586,10 +586,10 @@ export default function Contact() {
           height: 140px !important;
           width: 100%;
           padding: 14px 16px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(212,175,55,0.2);
+          background: var(--surface);
+          border: 1px solid rgba(99, 102, 241, 0.2);
           border-radius: 8px;
-          color: #ffffff;
+          color: var(--text);
           font-size: 14px;
           outline: none;
           transition: all 0.2s ease;
@@ -649,7 +649,7 @@ export default function Contact() {
         .submit-btn:hover {
           opacity: 0.95;
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
         }
 
         .submit-btn:active {

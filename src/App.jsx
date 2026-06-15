@@ -1,7 +1,5 @@
 // src/App.jsx
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { useSmoothScroll } from './hooks/useSmoothScroll';
-import { useTheme } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import CustomCursor from './components/CustomCursor';
 import Loader from './components/Loader';
@@ -9,107 +7,183 @@ import Hero from './sections/Hero';
 import About from './sections/About';
 import Contact from './sections/Contact';
 
-// Lazy load heavier sections
-const Skills = lazy(() => import('./sections/Skills'));
-const Projects = lazy(() => import('./sections/Projects'));
+const Skills    = lazy(() => import('./sections/Skills'));
+const Projects  = lazy(() => import('./sections/Projects'));
 const Education = lazy(() => import('./sections/Education'));
-const Certs = lazy(() => import('./sections/Certs'));
+const Certs     = lazy(() => import('./sections/Certs'));
 
 function SectionFallback() {
   return (
-    <div className="flex items-center justify-center py-32">
-      <div 
-        className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" 
-        style={{ borderColor: 'var(--gold)', borderTopColor: 'transparent' }}
-      />
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
+      <div style={{
+        width: 24, height: 24,
+        border: '2px solid var(--gold)',
+        borderTopColor: 'transparent',
+        borderRadius: '50%',
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
 export default function App() {
-  const { isDark, setIsDark } = useTheme();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isIntroComplete, setIsIntroComplete] = useState(false);
 
-  // Initialize smooth scroll
-  useSmoothScroll();
-
-  // After loader completes, reveal site content with a short delay
+  // Intersection Observer for Cinematic Snapping Transitions
   useEffect(() => {
     if (!isLoaded) return;
 
-    const timer = setTimeout(() => {
-      setIsIntroComplete(true);
-    }, 400);
+    const observerOptions = {
+      root: null, // viewport
+      rootMargin: '-5% 0px -5% 0px', // slightly offset trigger zones
+      threshold: 0.1, // trigger when at least 10% of the section is visible
+    };
 
-    return () => clearTimeout(timer);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active-section');
+        } else {
+          entry.target.classList.remove('active-section');
+        }
+      });
+    }, observerOptions);
+
+    const sections = document.querySelectorAll('.snap-section, .project-section');
+    sections.forEach((sec) => observer.observe(sec));
+
+    return () => observer.disconnect();
   }, [isLoaded]);
-
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
-  };
 
   return (
     <>
-      {/* Loading screen */}
       {!isLoaded && <Loader onComplete={() => setIsLoaded(true)} />}
 
-      {/* Site content — hidden until loader finishes */}
-      <div
-        style={{
-          opacity: isLoaded ? 1 : 0,
-          transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-          visibility: isLoaded ? 'visible' : 'hidden',
-        }}
-      >
-        {/* Custom cursor - desktop only */}
+      <div style={{
+        width: '100%',
+        minHeight: '100vh',
+        position: 'relative',
+        opacity: isLoaded ? 1 : 0,
+        transition: 'opacity 0.6s ease',
+        visibility: isLoaded ? 'visible' : 'hidden',
+        background: 'var(--bg)',
+      }}>
         <CustomCursor />
 
-        {/* Navbar - hidden on home page, fades in after scroll zoom is complete */}
-        <div 
-          className="navbar-wrapper"
-          style={{ 
-            opacity: 0, 
-            pointerEvents: 'none',
-            transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-            position: 'relative',
-            zIndex: 100
-          }}
-        >
-          <Navbar isDark={isDark} toggleTheme={toggleTheme} />
-        </div>
-
+        <Navbar isEmbedded={false} />
+        
         <main>
-          <Hero />
-          <About />
+          <div className="snap-section" id="hero">
+            <Hero scale={1.0} />
+          </div>
+          <div className="snap-section" id="about">
+            <About />
+          </div>
+          <div className="snap-section" id="skills">
+            <Suspense fallback={<SectionFallback />}><Skills /></Suspense>
+          </div>
+          
+          {/* Projects handles its own internal project card snapping */}
+          <Suspense fallback={<SectionFallback />}><Projects /></Suspense>
 
-          <Suspense fallback={<SectionFallback />}>
-            <Skills />
-          </Suspense>
-
-          <Suspense fallback={<SectionFallback />}>
-            <Projects />
-          </Suspense>
-
-          <Suspense fallback={<SectionFallback />}>
-            <Education />
-          </Suspense>
-
-          <Suspense fallback={<SectionFallback />}>
-            <Certs />
-          </Suspense>
-
-          <Contact />
+          <div className="snap-section" id="education">
+            <Suspense fallback={<SectionFallback />}><Education /></Suspense>
+          </div>
+          <div className="snap-section" id="certifications">
+            <Suspense fallback={<SectionFallback />}><Certs /></Suspense>
+          </div>
+          <div className="snap-section" id="contact">
+            <Contact />
+          </div>
         </main>
 
-        <footer className="border-t border-white/5 py-8">
-          <div className="section-container text-center">
-            <p className="text-text-muted text-sm">
-              © {new Date().getFullYear()} ADARSH K.S. Built with React, Three.js & passion.
+        <footer className="site-footer" style={{ borderTop: '1px solid var(--border)', padding: '24px 0', background: 'var(--bg)' }}>
+          <div className="section-container" style={{ textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
+              © {new Date().getFullYear()} ADARSH K.S. Built with React &amp; passion.
             </p>
           </div>
         </footer>
       </div>
+
+      {/* ── Global styles ── */}
+      <style>{`
+        html, body { margin: 0; padding: 0; }
+
+        /* ── Scroll Snapping & Slide Transitions for Desktop ── */
+        @media (min-width: 1024px) {
+          html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            zoom: 1.30; /* Zoom in the entire page on desktop */
+          }
+          
+          /* Cinematic transitions for inactive slides */
+          .snap-section,
+          .project-section {
+            opacity: 0.35;
+            filter: blur(6px);
+            transform: scale(0.95) translateY(25px);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        filter 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, filter, transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+          }
+
+          /* Active slide state */
+          .snap-section.active-section,
+          .project-section.active-section {
+            opacity: 1;
+            filter: blur(0px);
+            transform: scale(1) translateY(0);
+          }
+
+          /* Enforce full viewport snapping and centring */
+          .snap-section {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            height: 100vh !important;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-sizing: border-box;
+            position: relative;
+            background: var(--bg);
+          }
+
+          /* Snap target on the parent projects container (shows the header) */
+          #projects {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            box-sizing: border-box;
+            background: var(--bg);
+          }
+
+          /* Snap target on individual project cards */
+          .project-section {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            height: 100vh !important;
+            min-height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+          }
+
+          .site-footer {
+            scroll-snap-align: end;
+          }
+        }
+      `}</style>
     </>
   );
 }

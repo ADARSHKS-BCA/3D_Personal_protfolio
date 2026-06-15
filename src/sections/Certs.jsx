@@ -83,7 +83,7 @@ export default function Certs() {
   return (
     <section
       id="certifications"
-      className="section-container section-padding bg-white dark:bg-bg text-gray-900 dark:text-text certifications-section reveal-section"
+      className="section-container section-padding bg-transparent text-text certifications-section reveal-section"
       ref={sectionRef}
       data-animate
     >
@@ -134,7 +134,8 @@ export default function Certs() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(212, 175, 55, 0.1)',
+                background: 'rgba(99, 102, 241, 0.08)',
+                border: '1px solid rgba(99, 102, 241, 0.15)',
                 borderRadius: '0.75rem',
                 marginBottom: '1rem',
                 fontSize: '1.75rem',
@@ -206,7 +207,7 @@ export default function Certs() {
 
       <style>{`
         .cert-card:hover {
-          box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
         }
 
         @media (max-width: 1024px) {

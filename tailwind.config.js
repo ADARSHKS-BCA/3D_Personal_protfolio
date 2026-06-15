@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         bg: {
-          DEFAULT: '#05050f',
+          DEFAULT: '#0a0f1e',
           2: '#0d0d1f',
         },
         surface: '#12122a',
