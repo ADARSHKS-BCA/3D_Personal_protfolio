@@ -1,114 +1,18 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React from 'react';
 import { education } from '../data/education';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function Education() {
-  const sectionRef = useRef(null);
-  const lineRef = useRef(null);
-  const nodesRef = useRef([]);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    const isMobile = window.innerWidth < 768;
-    const reduce = isMobile ? 0.5 : 1;
-
-    /* ── Section reveal ── */
-    const sectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          sectionObserver.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    sectionObserver.observe(sectionRef.current);
-
-    /* ── Per-node card reveal via IntersectionObserver ── */
-    const nodeObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('edu-node-visible');
-            nodeObserver.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    nodesRef.current.forEach((node) => {
-      if (node) nodeObserver.observe(node);
-    });
-
-    /* ── GSAP: heading + timeline line draw ── */
-    const ctx = gsap.context(() => {
-      // Heading: fade up
-      const heading = sectionRef.current.querySelector('h2');
-      if (heading) {
-        gsap.fromTo(
-          heading,
-          { opacity: 0, y: 40 * reduce },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-
-      // Timeline line: stroke draw effect via scaleY scrub
-      if (lineRef.current) {
-        gsap.fromTo(
-          lineRef.current,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 70%',
-              end: 'bottom 30%',
-              scrub: 0.5,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-    }, sectionRef);
-
-    return () => {
-      ctx.revert();
-      sectionObserver.disconnect();
-      nodeObserver.disconnect();
-    };
-  }, []);
-
   return (
     <section
       id="education"
-      className="section-container section-padding bg-transparent text-text education-section reveal-section"
-      ref={sectionRef}
+      className="section-container section-padding bg-transparent text-text education-section"
       data-animate
       style={{ overflow: 'hidden' }}
     >
       <div className="section-divider"></div>
       <h2
-        className="gradient-text"
-        data-animate
+        className="section-title"
         style={{
-          fontSize: 'clamp(2rem, 5vw, 3rem)',
-          fontWeight: 700,
           textAlign: 'center',
           marginBottom: '4rem',
         }}
@@ -119,7 +23,6 @@ export default function Education() {
       <div style={{ position: 'relative', maxWidth: '900px', margin: '0 auto' }}>
         {/* Vertical timeline line */}
         <div
-          ref={lineRef}
           data-animate
           style={{
             position: 'absolute',
@@ -142,7 +45,6 @@ export default function Education() {
             return (
               <div
                 key={entry.id || i}
-                ref={(el) => (nodesRef.current[i] = el)}
                 className="edu-timeline-node"
                 data-animate
                 style={{

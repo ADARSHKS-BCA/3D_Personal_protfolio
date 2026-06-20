@@ -1,11 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 import MagneticButton from '../components/MagneticButton';
 import { useTheme } from '../context/ThemeContext';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const socialLinks = [
   { icon: '◈', label: 'GitHub', href: 'https://github.com/adarsh-ks' },
@@ -16,7 +12,6 @@ const socialLinks = [
 
 export default function Contact() {
   const { isDark } = useTheme();
-  const sectionRef = useRef(null);
   const formCardRef = useRef(null);
   const formRef = useRef(null);
 
@@ -26,121 +21,6 @@ export default function Contact() {
   const [success, setSuccess] = useState(false);
   const [errorState, setErrorState] = useState(false);
   const [shouldShake, setShouldShake] = useState(false);
-
-  // GSAP scroll animations
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    const isMobile = window.innerWidth < 768;
-    const reduce = isMobile ? 0.5 : 1;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible')
-          observer.unobserve(entry.target)
-        }
-      },
-      { threshold: 0.15 }
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    const ctx = gsap.context(() => {
-      // Heading: fade up
-      const heading = sectionRef.current.querySelector('h2');
-      if (heading) {
-        gsap.fromTo(
-          heading,
-          { opacity: 0, y: 40 * reduce },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-
-      // Left column content elements
-      const leftCol = sectionRef.current.querySelector('.contact-left');
-      if (leftCol) {
-        const leftElements = leftCol.querySelectorAll('.contact-heading, .contact-subtext, .available-badge, .social-card-item');
-        if (leftElements.length) {
-          gsap.fromTo(
-            leftElements,
-            { opacity: 0, y: 20 * reduce },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.5,
-              stagger: 0.08,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: 'top 90%',
-                once: true,
-                invalidateOnRefresh: true,
-              },
-            }
-          );
-        }
-      }
-
-      // Form card
-      if (formCardRef.current) {
-        gsap.set(formCardRef.current, { willChange: 'transform' });
-        gsap.fromTo(
-          formCardRef.current,
-          { opacity: 0, y: 60 * reduce, scale: 0.95 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: formCardRef.current,
-              start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-            onComplete: () => {
-              gsap.set(formCardRef.current, { willChange: 'auto' });
-              
-              // Fields stagger
-              const fields = formCardRef.current.querySelectorAll('.form-field-group');
-              if (fields.length) {
-                gsap.fromTo(
-                  fields,
-                  { opacity: 0, x: -20 * reduce },
-                  {
-                    opacity: 1,
-                    x: 0,
-                    duration: 0.5,
-                    stagger: 0.1,
-                    ease: 'power3.out',
-                  }
-                );
-              }
-            },
-          }
-        );
-      }
-    }, sectionRef);
-
-    return () => {
-      ctx.revert();
-      observer.disconnect();
-    };
-  }, []);
 
   const handleInputChange = (field, val) => {
     setFormData(prev => ({ ...prev, [field]: val }));
@@ -222,8 +102,7 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="contact-section reveal-section"
-      ref={sectionRef}
+      className="contact-section section-padding"
       data-animate
     >
       <div className="section-divider"></div>
@@ -248,11 +127,11 @@ export default function Contact() {
             <span style={{ color: isDark ? 'var(--text)' : '#111827', fontWeight: 600 }}>Available for work</span>
           </div>
 
-          <h3 className="contact-heading gradient-text">
-            Let's Build Something
+          <h3 className="contact-heading section-title">
+            Contact Me
           </h3>
 
-          <p className="contact-subtext">
+          <p className="contact-subtext section-subtitle">
             Open to full-time roles, freelance projects, and interesting problems worth solving.
           </p>
 

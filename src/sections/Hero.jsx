@@ -1,145 +1,129 @@
 // src/sections/Hero.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Hero({ scale = 1.0 }) {
-  const headingText = "I AM ADARSH";
-  const letters = headingText.split("");
-
   return (
     <section 
-      className="relative w-full flex flex-col items-center justify-center text-center px-4 overflow-hidden"
+      className="relative w-full h-[100vh] flex flex-col justify-center px-4 overflow-hidden select-none"
       id="hero"
       style={{
-        background: 'var(--bg)',
-        height: '90vh', // Mobile default
+        background: '#f5f0e8', // Light cream background
+        height: '100vh',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center',
+        position: 'relative',
       }}
     >
-      {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] md:w-[450px] h-[280px] md:h-[450px] bg-gradient-to-tr from-[#6366f1]/10 to-[#818cf8]/10 rounded-full blur-3xl opacity-75 pointer-events-none" />
-
-      <div className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center justify-center gap-10 h-full py-16 md:py-24">
-        {/* Text Group */}
-        <div className="flex flex-col items-center justify-center">
-          {/* "I AM ADARSH." Title with letter animations */}
-          <h1 
-            className="font-black tracking-wider text-slate-100 uppercase select-none leading-none mb-6 text-center"
-            style={{ 
-              fontSize: 'clamp(2.2rem, 8.5vw, 7.2rem)', 
-              whiteSpace: 'nowrap' 
-            }}
-          >
-            {letters.map((char, index) => (
-              <span
-                key={index}
-                className="hero-letter"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-            <span className="hero-period">.</span>
-          </h1>
-        </div>
-
-        {/* Custom Mouse Scroll Icon */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="scroll-mouse">
-            <div className="scroll-wheel"></div>
-          </div>
-        </div>
+      {/* ── Watermark text "AK" ── */}
+      <div
+        className="hero-watermark"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          right: '-10px',
+          fontSize: '160px',
+          fontWeight: 900,
+          color: '#e8e3d8',
+          opacity: 1,
+          zIndex: 0,
+          pointerEvents: 'none',
+          lineHeight: 1,
+          fontFamily: "'Inter', system-ui, sans-serif",
+        }}
+      >
+        AK
       </div>
 
-      {/* Styled Override for embedded monitor view and animation keyframes */}
-      <style>{`
-        /* Staggered letter entrance animations */
-        .hero-letter {
-          display: inline-block;
-          opacity: 0;
-          transform: translateY(30px);
-          animation: letterEntrance 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
+      {/* ── Hero content (left aligned, padding-left: 8vw, z-index: 1) ── */}
+      <div 
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          paddingLeft: '8vw',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          textAlign: 'left',
+          width: '100%',
+          maxWidth: '1200px',
+          margin: '0 auto',
+        }}
+      >
+        {/* Eyebrow Line */}
+        <div 
+          style={{
+            fontSize: '10px',
+            letterSpacing: '0.2em',
+            color: '#9a8f7e',
+            textTransform: 'uppercase',
+            marginBottom: '20px',
+            fontWeight: 600,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          PORTFOLIO &middot; 2025 &middot; BANGALORE
+        </div>
 
-        .hero-period {
-          display: inline-block;
-          color: #d4af37;
-          opacity: 0;
-          transform: translateY(30px) scale(0);
-          animation: periodEntrance 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-          animation-delay: 0.65s; /* Animates after the letters (11 chars * 0.05s = 0.55s) */
-        }
+        {/* Name Line 1 */}
+        <h1 
+          style={{
+            fontSize: 'clamp(60px, 10vw, 110px)',
+            fontWeight: 900,
+            letterSpacing: '-3px',
+            color: '#1a1612',
+            lineHeight: 0.95,
+            margin: 0,
+            fontFamily: "'Outfit', 'Inter', sans-serif",
+            textTransform: 'uppercase',
+          }}
+        >
+          ADARSH
+        </h1>
 
-        @keyframes letterEntrance {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+        {/* Name Line 2 */}
+        <h1 
+          style={{
+            fontSize: 'clamp(60px, 10vw, 110px)',
+            fontWeight: 900,
+            letterSpacing: '-3px',
+            color: '#1a1612',
+            lineHeight: 0.95,
+            margin: 0,
+            fontFamily: "'Outfit', 'Inter', sans-serif",
+            textTransform: 'uppercase',
+          }}
+        >
+          K.S
+        </h1>
 
-        @keyframes periodEntrance {
-          0% {
-            opacity: 0;
-            transform: translateY(30px) scale(0);
-          }
-          70% {
-            opacity: 1;
-            transform: translateY(0) scale(1.4);
-          }
-          85% {
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
+        {/* Divider */}
+        <div 
+          style={{
+            width: '40px',
+            height: '3px',
+            background: '#e8622a', // Orange-red accent
+            margin: '20px 0',
+            borderRadius: '2px',
+          }}
+        />
 
-        /* Mouse scroll icon styles */
-        .scroll-mouse {
-          width: 24px;
-          height: 40px;
-          border: 2px solid rgba(99, 102, 241, 0.4);
-          border-radius: 12px;
-          display: flex;
-          justify-content: center;
-          padding-top: 6px;
-          position: relative;
-          transition: border-color 0.3s ease;
-        }
-        
-        .scroll-mouse:hover {
-          border-color: rgba(99, 102, 241, 0.8);
-        }
-        
-        .scroll-wheel {
-          width: 4px;
-          height: 8px;
-          background-color: var(--gold, #6366f1);
-          border-radius: 2px;
-          animation: mouse-scroll 1.6s infinite ease-in-out;
-        }
-
-        @keyframes mouse-scroll {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          20% {
-            opacity: 1;
-          }
-          80% {
-            transform: translateY(14px);
-            opacity: 0;
-          }
-          100% {
-            transform: translateY(14px);
-            opacity: 0;
-          }
-        }
-      `}</style>
+        {/* Role Text */}
+        <div 
+          style={{
+            fontSize: '13px',
+            color: '#7a6e60',
+            letterSpacing: '0.03em',
+            fontWeight: 500,
+            fontFamily: "'Inter', sans-serif",
+          }}
+        >
+          Software Developer &mdash; Backend, APIs &amp; Flutter
+        </div>
+      </div>
     </section>
   );
 }

@@ -1,76 +1,43 @@
-// src/components/Navbar.jsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 const navLinks = [
-  { name: 'About Us', href: '#about' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Project', href: '#projects' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'ABOUT', href: '#about' },
+  { name: 'SKILLS', href: '#skills' },
+  { name: 'PROJECTS', href: '#projects' },
+  { name: 'CONTACT', href: '#contact' },
 ];
 
 const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
   const { isDark } = useTheme();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const [visible, setVisible] = useState(true);
+  const linksRef = useRef({});
 
-  // Scroll detection for active section and background blending
+  // Listen to optimized ScrollTrigger active section events
   useEffect(() => {
-    const scrollContainer = isEmbedded 
-      ? document.getElementById('monitor-scroll-container') 
-      : window;
-      
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const scrollTop = isEmbedded 
-        ? scrollContainer.scrollTop 
-        : window.scrollY;
-
-      setIsScrolled(scrollTop > 20);
-
-      // Detect active section
-      const sections = navLinks.map((link) => link.href.replace('#', ''));
-      let current = '';
-
-      // If at the very top, set active to empty (Hero active)
-      if (scrollTop < 100) {
-        setActiveSection('');
-        return;
-      }
-
-      for (const sectionId of sections) {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          if (isEmbedded) {
-            const scaledOffsetTop = el.offsetTop * scale;
-            const scaledHeight = el.offsetHeight * scale;
-            const offsetFromViewportTop = scaledOffsetTop - scrollContainer.scrollTop;
-            if (offsetFromViewportTop <= 120 && offsetFromViewportTop + scaledHeight > 120) {
-              current = sectionId;
-              break;
-            }
-          } else {
-            const rect = el.getBoundingClientRect();
-            if (rect.top <= 150 && rect.bottom > 150) {
-              current = sectionId;
-              break;
-            }
-          }
-        }
-      }
-
-      setActiveSection(current);
+    const handleSectionActive = (e) => {
+      setActiveSection(e.detail);
     };
+    window.addEventListener('sectionActive', handleSectionActive);
+    return () => window.removeEventListener('sectionActive', handleSectionActive);
+  }, []);
 
-    const targetListener = isEmbedded ? scrollContainer : window;
-    targetListener.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => targetListener.removeEventListener('scroll', handleScroll);
-  }, [isEmbedded, scale]);
+  // Update underline indicator position/size on active link change
+  useEffect(() => {
+    const activeEl = linksRef.current[activeSection];
+    if (activeEl) {
+      setUnderlineStyle({
+        left: activeEl.offsetLeft,
+        width: activeEl.offsetWidth,
+        opacity: 1,
+      });
+    } else {
+      setUnderlineStyle((prev) => ({ ...prev, opacity: 0 }));
+    }
+  }, [activeSection]);
 
   // Close mobile menu on resize
   useEffect(() => {
@@ -79,7 +46,6 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
         setIsMobileMenuOpen(false);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -88,7 +54,8 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
     (e, href) => {
       e.preventDefault();
       const targetId = href.replace('#', '');
-      const el = document.getElementById(targetId);
+      const wrapperId = `${targetId}-wrapper`;
+      const el = document.getElementById(wrapperId) || document.getElementById(targetId);
       if (el) {
         if (isEmbedded) {
           const scrollContainer = document.getElementById('monitor-scroll-container');
@@ -99,16 +66,14 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
             });
           }
         } else {
-          // Temporarily disable scroll snapping to allow smooth scroll
-          const html = document.documentElement;
-          html.style.scrollSnapType = 'none';
-
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-          // Re-enable scroll snapping after the scroll finishes
-          setTimeout(() => {
-            html.style.scrollSnapType = 'y mandatory';
-          }, 1000);
+          if (window.lenis) {
+            window.lenis.scrollTo(el, {
+              duration: 1.2,
+              easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2 // cubic ease in out
+            });
+          } else {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
       }
       setIsMobileMenuOpen(false);
@@ -125,38 +90,48 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
           left: 0,
           width: '100%',
           zIndex: 1000,
-          background: isScrolled
-            ? (isDark ? 'rgba(10, 15, 30, 0.75)' : 'rgba(248, 250, 252, 0.75)')
-            : 'transparent',
-          backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-          WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
-          borderBottom: isScrolled
-            ? (isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)')
-            : '1px solid transparent',
-          transition: 'all 0.3s ease',
-          padding: isScrolled ? '12px 24px' : '20px 24px',
+          background: 'transparent',
+          boxShadow: 'none',
+          borderBottom: 'none',
+          padding: '24px 8vw', // 8vw padding on left/right matching the Hero design layout
           display: visible ? 'flex' : 'none',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           fontFamily: "'Inter', sans-serif",
+          transition: 'all 0.3s ease',
         }}
       >
-        {/* Desktop Links */}
-        <div className="nav-desktop-container" style={{ gap: '32px' }}>
+        {/* Left Side: Logo AK */}
+        <div 
+          style={{
+            fontSize: '18px',
+            fontWeight: '900',
+            color: '#1a1612', // Bold black
+            letterSpacing: '1px',
+            userSelect: 'none',
+          }}
+        >
+          AK
+        </div>
+
+        {/* Desktop Links - Right aligned, 10px, 0.15em letter-spacing, uppercase, color #9a8f7e */}
+        <div className="nav-desktop-container" style={{ gap: '32px', display: 'flex', alignItems: 'center', position: 'relative' }}>
           {navLinks.map((link) => {
-            const isActive = activeSection === link.href.replace('#', '');
+            const sectionId = link.href.replace('#', '');
+            const isActive = activeSection === sectionId;
             return (
               <a
                 key={link.name}
+                ref={(el) => (linksRef.current[sectionId] = el)}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
                 data-cursor="pointer"
                 style={{
-                  fontSize: '12px',
+                  fontSize: '10px',
                   fontWeight: isActive ? 700 : 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '1.5px',
-                  color: isActive ? 'var(--gold)' : 'var(--text-muted)',
+                  letterSpacing: '0.15em',
+                  color: isActive ? '#e8622a' : '#9a8f7e', // Highlight with divider accent color (#e8622a)
                   textDecoration: 'none',
                   position: 'relative',
                   padding: '6px 0',
@@ -165,22 +140,24 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
                 className="nav-link-item"
               >
                 {link.name}
-                <span 
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '2px',
-                    backgroundColor: 'var(--gold)',
-                    transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                    transformOrigin: 'left',
-                    transition: 'transform 0.3s ease',
-                  }}
-                />
               </a>
             );
           })}
+
+          {/* Sliding underline indicator */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '0',
+              left: `${underlineStyle.left}px`,
+              width: `${underlineStyle.width}px`,
+              height: '2px',
+              backgroundColor: '#e8622a',
+              opacity: underlineStyle.opacity,
+              transition: 'left 0.35s cubic-bezier(0.25, 1, 0.5, 1), width 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease',
+              pointerEvents: 'none',
+            }}
+          />
         </div>
 
         {/* Mobile Toggle Menu */}
@@ -190,14 +167,11 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
           style={{
             background: 'transparent',
             border: 'none',
-            color: 'var(--text)',
-            fontSize: '20px',
+            color: '#1a1612', // Matches header text/logo
+            fontSize: '22px',
             cursor: 'pointer',
             padding: '4px',
-            position: 'absolute',
-            right: '24px',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            zIndex: 1001,
           }}
         >
           {isMobileMenuOpen ? '✕' : '☰'}
@@ -210,15 +184,16 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
           style={{
             position: 'fixed',
             inset: 0,
-            top: '56px',
+            top: 0,
             zIndex: 999,
-            background: isDark ? 'rgba(10, 15, 30, 0.95)' : 'rgba(248, 250, 252, 0.95)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
+            background: 'rgba(245, 240, 232, 0.98)', // Matching light cream bg with glass overlay
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             display: 'flex',
             flexDirection: 'column',
-            padding: '40px 24px',
-            gap: '24px',
+            justifyContent: 'center',
+            padding: '40px 8vw',
+            gap: '32px',
             animation: 'drawerReveal 0.3s ease-out both',
           }}
         >
@@ -231,13 +206,13 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
                 onClick={(e) => handleNavClick(e, link.href)}
                 style={{
                   fontSize: '18px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
-                  color: isActive ? 'var(--gold)' : 'var(--text)',
+                  color: isActive ? '#e8622a' : '#1a1612',
                   textDecoration: 'none',
-                  borderBottom: isActive ? '2px solid var(--gold)' : '1px solid rgba(0,0,0,0.05)',
-                  paddingBottom: '8px',
+                  borderBottom: isActive ? '2px solid #e8622a' : '1px solid rgba(0,0,0,0.05)',
+                  paddingBottom: '12px',
                 }}
               >
                 {link.name}
@@ -249,10 +224,7 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
 
       <style>{`
         .nav-link-item:hover {
-          color: var(--gold) !important;
-        }
-        .nav-link-item:hover span {
-          transform: scaleX(1) !important;
+          color: #e8622a !important;
         }
         @keyframes drawerReveal {
           from { opacity: 0; transform: translateY(-10px); }
@@ -265,7 +237,7 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
         .nav-mobile-toggle {
           display: none;
           align-items: center;
-          justify-content: center;
+          justifyContent: center;
         }
 
         @media (max-width: 767px) {

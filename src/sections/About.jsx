@@ -132,48 +132,19 @@ function AnimatedHeading({ text, className }) {
    About Section (main export)
    ────────────────────────────────────────────── */
 export default function About() {
-  const sectionRef = useRef(null);
-  const leftColRef = useRef(null);
-  const rightColRef = useRef(null);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-
-    const scrollContainer = document.getElementById('monitor-scroll-container');
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible')
-          observer.unobserve(entry.target)
-        }
-      },
-      { 
-        root: scrollContainer || null,
-        threshold: 0.15 
-      }
-    )
-
-    observer.observe(sectionRef.current)
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   return (
-    <section className="about section-padding bg-transparent text-text about-section reveal-about" id="about" ref={sectionRef}>
+    <section className="about section-padding bg-transparent text-text about-section" id="about">
       <div className="section-divider"></div>
       <div className="section-container">
         <div className="about__grid">
           {/* Left column – Photo card */}
-          <div className="about__left" ref={leftColRef}>
+          <div className="about__left">
             <TiltCard />
           </div>
 
           {/* Right column – Content */}
-          <div className="about__right" ref={rightColRef}>
-            <AnimatedHeading text={HEADING_TEXT} className="about__heading gradient-text" />
+          <div className="about__right">
+            <AnimatedHeading text={HEADING_TEXT} className="about__heading section-title" />
 
             <div className="about__bio">
               {BIO_PARAGRAPHS.map((paragraph, i) => (
@@ -199,68 +170,6 @@ export default function About() {
 
       {/* Inline styles */}
       <style>{`
-        .reveal-about {
-          opacity: 0;
-          transform: translateY(40px);
-          transition: opacity 0.7s ease, transform 0.7s ease;
-          margin-top: 80px;
-        }
-
-        @media (min-width: 1024px) {
-          .reveal-about {
-            margin-top: 120px;
-          }
-        }
-
-        .reveal-about.is-visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        /* Scoped child elements slide-in on is-visible */
-        .reveal-about .about__left {
-          opacity: 0;
-          transform: translateX(-40px);
-          transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .reveal-about.is-visible .about__left {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .reveal-about .about__right {
-          opacity: 0;
-          transform: translateX(40px);
-          transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-          transition-delay: 0.15s;
-        }
-        .reveal-about.is-visible .about__right {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .reveal-about .about__heading,
-        .reveal-about .about__bio-paragraph,
-        .reveal-about .about__cta {
-          opacity: 0;
-          transform: translateY(20px);
-          transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .reveal-about.is-visible .about__heading {
-          opacity: 1;
-          transform: translateY(0);
-          transition-delay: 0.3s;
-        }
-        .reveal-about.is-visible .about__bio-paragraph {
-          opacity: 1;
-          transform: translateY(0);
-          transition-delay: 0.4s;
-        }
-        .reveal-about.is-visible .about__cta {
-          opacity: 1;
-          transform: translateY(0);
-          transition-delay: 0.5s;
-        }
 
         .about {
           position: relative;
@@ -462,10 +371,6 @@ export default function About() {
           transform: translateY(0);
         }
 
-        /* ── Section utilities (if not globally defined) ── */
-        .section-padding {
-          padding: 180px 0;
-        }
 
         .section-container {
           max-width: 1200px;

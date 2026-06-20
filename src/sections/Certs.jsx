@@ -1,99 +1,15 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { certs } from '../data/certs';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function Certs() {
-  const sectionRef = useRef(null);
-  const cardsRef = useRef([]);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    const isMobile = window.innerWidth < 768;
-    const reduce = isMobile ? 0.5 : 1;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible')
-          observer.unobserve(entry.target)
-        }
-      },
-      { threshold: 0.15 }
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    const ctx = gsap.context(() => {
-      // Heading: fade up
-      const heading = sectionRef.current.querySelector('h2');
-      if (heading) {
-        gsap.fromTo(
-          heading,
-          { opacity: 0, y: 40 * reduce },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-
-      // Each badge card
-      const validCards = cardsRef.current.filter(Boolean);
-      if (validCards.length > 0) {
-        gsap.fromTo(
-          validCards,
-          { opacity: 0, scale: 0.8, y: 30 * reduce },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 0.5,
-            stagger: 0.08,
-            ease: 'back.out(1.4)',
-            scrollTrigger: {
-              trigger: validCards[0],
-              start: 'top 90%',
-              once: true,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-    }, sectionRef);
-
-    return () => {
-      ctx.revert();
-      observer.disconnect();
-    };
-  }, []);
-
   return (
     <section
       id="certifications"
-      className="section-container section-padding bg-transparent text-text certifications-section reveal-section"
-      ref={sectionRef}
-      data-animate
+      className="section-container section-padding bg-transparent text-text certifications-section"
     >
       <div className="section-divider"></div>
       <h2
-        className="gradient-text"
-        data-animate
+        className="section-title"
         style={{
-          fontSize: 'clamp(2rem, 5vw, 3rem)',
-          fontWeight: 700,
           textAlign: 'center',
           marginBottom: '4rem',
         }}
@@ -114,9 +30,7 @@ export default function Certs() {
         {certs.map((cert, i) => (
           <div
             key={cert.id || i}
-            ref={(el) => (cardsRef.current[i] = el)}
             className="glass-card shine-effect cert-card"
-            data-animate
             style={{
               padding: '1.5rem',
               borderRadius: '0.75rem',

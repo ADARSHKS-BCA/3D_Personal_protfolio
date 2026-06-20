@@ -1,9 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '../data/projects';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // ── Magnetic Button Component ──
 function MagneticButton({ children, href, target, rel, className, style, onMouseEnter, onMouseLeave }) {
@@ -251,16 +248,6 @@ function ProjectGraphic({ projectId, title, tech }) {
 
 // ── Main Projects Section Component ──
 export default function Projects() {
-  const sectionRef = useRef(null);
-  const headingRef = useRef(null);
-  const subheadingRef = useRef(null);
-
-  // Get correct scroll container (monitor-scroll-container on desktop, window on mobile)
-  const getScroller = () => {
-    const container = document.getElementById('monitor-scroll-container');
-    return container ? container : window;
-  };
-
   // ── Cursor following border glow ──
   const handleMouseMove = (e) => {
     const card = e.currentTarget;
@@ -307,167 +294,22 @@ export default function Projects() {
     }
   };
 
-  useEffect(() => {
-    const scroller = getScroller();
-
-    const ctx = gsap.context(() => {
-      // 1. Header reveal
-      if (headingRef.current) {
-        gsap.fromTo(
-          headingRef.current,
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              scroller: scroller,
-              start: 'top 90%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      }
-
-      if (subheadingRef.current) {
-        gsap.fromTo(
-          subheadingRef.current,
-          { opacity: 0, y: 25 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            delay: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              scroller: scroller,
-              start: 'top 90%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      }
-
-      // 2. Animate each project item
-      projects.forEach((project) => {
-        const item = document.getElementById(`project-item-${project.id}`);
-        if (!item) return;
-
-        const card = item.querySelector('.project-showcase-card');
-        const info = item.querySelector('.project-showcase-info');
-        const bullets = item.querySelectorAll('.project-showcase-bullet');
-        const chips = item.querySelectorAll('.project-showcase-chip');
-        const buttons = item.querySelectorAll('.project-showcase-btn');
-        const innerWrapper = item.querySelector('.project-inner-wrapper');
-
-        // Check window width dynamically inside ScrollTrigger
-        const isSmallScreen = window.innerWidth < 1024;
-
-        // Entry animation
-        const entryTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: item,
-            scroller: scroller,
-            start: isSmallScreen ? 'top 85%' : 'top 80%',
-            toggleActions: 'play none none none',
-            invalidateOnRefresh: true,
-          },
-        });
-
-        if (isSmallScreen) {
-          // Responsive Mobile/Tablet Entry Animation
-          entryTl
-            .fromTo(card, 
-              { opacity: 0, y: 40 },
-              { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
-            )
-            .fromTo(info,
-              { opacity: 0, y: 30 },
-              { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
-              '-=0.4'
-            )
-            .fromTo(bullets,
-              { opacity: 0, y: 10 },
-              { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: 'power2.out' },
-              '-=0.3'
-            )
-            .fromTo(chips,
-              { opacity: 0, scale: 0.8 },
-              { opacity: 1, scale: 1, stagger: 0.04, duration: 0.3, ease: 'power2.out' },
-              '-=0.3'
-            )
-            .fromTo(buttons,
-              { opacity: 0, scale: 0.95 },
-              { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' },
-              '-=0.2'
-            );
-        } else {
-          // Premium Cinematic Desktop Entry Animation
-          entryTl
-            .fromTo(card,
-              { opacity: 0, y: 100, scale: 0.9 },
-              { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' }
-            )
-            .fromTo(info,
-              { opacity: 0, x: 80 },
-              { opacity: 1, x: 0, duration: 0.9, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-              '-=0.7'
-            )
-            .fromTo(bullets,
-              { opacity: 0, y: 15 },
-              { opacity: 1, y: 0, stagger: 0.1, duration: 0.5, ease: 'power3.out' },
-              '-=0.5'
-            )
-            .fromTo(chips,
-              { opacity: 0, scale: 0.7 },
-              { opacity: 1, scale: 1, stagger: 0.05, duration: 0.4, ease: 'back.out(1.5)' },
-              '-=0.4'
-            )
-            .fromTo(buttons,
-              { opacity: 0, scale: 0.9 },
-              { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' },
-              '-=0.3'
-            );
-
-        }
-      });
-    }, sectionRef);
-
-    // Refresh triggers to ensure layout is measured accurately
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 1000);
-
-    return () => {
-      clearTimeout(refreshTimer);
-      ctx.revert();
-    };
-  }, []);
-
   return (
     <section
       id="projects"
-      ref={sectionRef}
-      className="bg-transparent text-text relative w-full overflow-hidden"
-      style={{ paddingBottom: '80px' }}
+      className="bg-transparent text-text relative w-full overflow-hidden section-padding"
     >
       <div className="section-divider"></div>
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="px-6">
         <h2
-          ref={headingRef}
-          className="gradient-text text-4xl lg:text-5xl font-bold mb-4"
-          style={{ letterSpacing: '-0.02em' }}
+          className="section-title"
         >
           Selected Products
         </h2>
         <p
-          ref={subheadingRef}
-          className="text-text-muted text-base lg:text-lg max-w-lg mx-auto"
+          className="section-subtitle"
         >
           A curated presentation of software products, microservices, and mobile platforms engineered for production.
         </p>

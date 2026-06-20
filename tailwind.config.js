@@ -9,19 +9,19 @@ export default {
     extend: {
       colors: {
         bg: {
-          DEFAULT: '#0a0f1e',
-          2: '#0d0d1f',
+          DEFAULT: 'var(--bg)',
+          2: 'var(--bg-2)',
         },
-        surface: '#12122a',
-        border: 'rgba(139,92,246,0.2)',
+        surface: 'var(--surface)',
+        border: 'var(--border)',
         purple: {
-          DEFAULT: '#8b5cf6',
-          glow: 'rgba(139,92,246,0.4)',
+          DEFAULT: 'var(--gold)',
+          glow: 'rgba(232, 98, 42, 0.2)',
         },
-        cyan: '#06b6d4',
+        cyan: 'var(--gold-light)',
         text: {
-          DEFAULT: '#f8fafc',
-          muted: '#94a3b8',
+          DEFAULT: 'var(--text)',
+          muted: 'var(--text-muted)',
         },
       },
       fontFamily: {
