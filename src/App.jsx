@@ -92,7 +92,7 @@ export default function App() {
       );
 
       // Line-by-line reveal of Hero title
-      entranceTl.fromTo('#hero h1', 
+      entranceTl.fromTo('#hero .hero-title', 
         { opacity: 0, y: 50, rotate: 1 }, 
         { opacity: 1, y: 0, rotate: 0, stagger: 0.15, duration: 1.6 }, 
         0.4
@@ -106,7 +106,7 @@ export default function App() {
       );
 
       // Eyebrow and Role text fade-in
-      entranceTl.fromTo('#hero div:first-child, #hero div:last-child, #hero .section-divider', 
+      entranceTl.fromTo('#hero .hero-eyebrow, #hero .hero-role, #hero .hero-divider', 
         { opacity: 0, y: 20 }, 
         { opacity: 1, y: 0, stagger: 0.1, duration: 1.2 }, 
         1.0
@@ -526,7 +526,15 @@ export default function App() {
 
     }, mainRef);
 
-    return () => ctx.revert();
+    // Delay refresh to ensure ScrollTrigger measures correct coordinates after scrollbar/layout settles
+    const refreshTimeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
+
+    return () => {
+      ctx.revert();
+      clearTimeout(refreshTimeout);
+    };
   }, [isLoaded]);
 
   return (
@@ -628,7 +636,6 @@ export default function App() {
         @media (min-width: 1024px) {
           html {
             scroll-behavior: auto !important;
-            zoom: 1.30; /* Zoom in the entire page on desktop */
           }
         }
 
@@ -641,6 +648,24 @@ export default function App() {
           #hero-wrapper .section-content-inner {
             opacity: 1;
             filter: blur(0px);
+          }
+          header {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          #hero .hero-title {
+            opacity: 0;
+            transform: translateY(50px) rotate(1deg);
+          }
+          #hero .hero-watermark {
+            opacity: 0;
+            transform: scale(0.97);
+          }
+          #hero .hero-eyebrow,
+          #hero .hero-role,
+          #hero .hero-divider {
+            opacity: 0;
+            transform: translateY(20px);
           }
           .project-inner-wrapper {
             opacity: 0;

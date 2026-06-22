@@ -55,6 +55,7 @@ export default function Hero({ scale = 1.0 }) {
       >
         {/* Eyebrow Line */}
         <div 
+          className="hero-eyebrow"
           style={{
             fontSize: '10px',
             letterSpacing: '0.2em',
@@ -70,6 +71,7 @@ export default function Hero({ scale = 1.0 }) {
 
         {/* Name Line 1 */}
         <h1 
+          className="hero-title"
           style={{
             fontSize: 'clamp(60px, 10vw, 110px)',
             fontWeight: 900,
@@ -86,6 +88,7 @@ export default function Hero({ scale = 1.0 }) {
 
         {/* Name Line 2 */}
         <h1 
+          className="hero-title"
           style={{
             fontSize: 'clamp(60px, 10vw, 110px)',
             fontWeight: 900,
@@ -102,6 +105,7 @@ export default function Hero({ scale = 1.0 }) {
 
         {/* Divider */}
         <div 
+          className="hero-divider"
           style={{
             width: '40px',
             height: '3px',
@@ -113,6 +117,7 @@ export default function Hero({ scale = 1.0 }) {
 
         {/* Role Text */}
         <div 
+          className="hero-role"
           style={{
             fontSize: '13px',
             color: '#7a6e60',
