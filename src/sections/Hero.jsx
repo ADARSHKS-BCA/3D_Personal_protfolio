@@ -31,7 +31,7 @@ export default function Hero({ scale = 1.0 }) {
           zIndex: 0,
           pointerEvents: 'none',
           lineHeight: 1,
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "var(--font-display)",
         }}
       >
         AK
@@ -53,23 +53,7 @@ export default function Hero({ scale = 1.0 }) {
           margin: '0 auto',
         }}
       >
-        {/* Eyebrow Line */}
-        <div 
-          className="hero-eyebrow"
-          style={{
-            fontSize: '10px',
-            letterSpacing: '0.2em',
-            color: '#9a8f7e',
-            textTransform: 'uppercase',
-            marginBottom: '20px',
-            fontWeight: 600,
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
-        >
-          PORTFOLIO &middot; 2025 &middot; BANGALORE
-        </div>
-
-        {/* Name Line 1 */}
+        {/* Name Title */}
         <h1 
           className="hero-title"
           style={{
@@ -79,55 +63,19 @@ export default function Hero({ scale = 1.0 }) {
             color: '#1a1612',
             lineHeight: 0.95,
             margin: 0,
-            fontFamily: "'Outfit', 'Inter', sans-serif",
+            fontFamily: "var(--font-display)",
             textTransform: 'uppercase',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          ADARSH
+          <div style={{ overflow: 'hidden' }}>
+            <span>ADARSH</span>
+          </div>
+          <div style={{ overflow: 'hidden' }}>
+            <span>K.S</span>
+          </div>
         </h1>
-
-        {/* Name Line 2 */}
-        <h1 
-          className="hero-title"
-          style={{
-            fontSize: 'clamp(60px, 10vw, 110px)',
-            fontWeight: 900,
-            letterSpacing: '-3px',
-            color: '#1a1612',
-            lineHeight: 0.95,
-            margin: 0,
-            fontFamily: "'Outfit', 'Inter', sans-serif",
-            textTransform: 'uppercase',
-          }}
-        >
-          K.S
-        </h1>
-
-        {/* Divider */}
-        <div 
-          className="hero-divider"
-          style={{
-            width: '40px',
-            height: '3px',
-            background: '#e8622a', // Orange-red accent
-            margin: '20px 0',
-            borderRadius: '2px',
-          }}
-        />
-
-        {/* Role Text */}
-        <div 
-          className="hero-role"
-          style={{
-            fontSize: '13px',
-            color: '#7a6e60',
-            letterSpacing: '0.03em',
-            fontWeight: 500,
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
-          Software Developer &mdash; Backend, APIs &amp; Flutter
-        </div>
       </div>
     </section>
   );

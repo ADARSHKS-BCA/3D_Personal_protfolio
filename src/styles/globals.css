@@ -24,6 +24,10 @@
     --duration-fast: 0.3s;
     --duration-standard: 0.6s;
     --duration-slow: 1s;
+
+    /* Fonts */
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
   }
 
   * {
@@ -39,11 +43,10 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
     background-color: var(--bg);
     color: var(--text);
     overflow-x: hidden;
-    cursor: none;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
@@ -69,11 +72,10 @@
     background: var(--gold-light);
   }
 
-  a, button {
-    cursor: none;
-  }
+
 
   h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
     font-weight: 700;
     line-height: 1.2;
     color: var(--text);
@@ -184,19 +186,11 @@
   }
 }
 
-/* Hide default cursor globally on desktop */
-@media (min-width: 769px) {
-  *, *::before, *::after, html, body, a, button, input, textarea, [role="button"], iframe {
-    cursor: none !important;
-  }
+/* Future Cursor Arrow - https://www.cursors-4u.com/cursor/future-cursor-arrow */
+* {
+  cursor: url('https://cdn.cursors-4u.net/previews/normal-9e607e2c-48.webp') 33 30, auto !important;
 }
-
-/* Mobile cursor reset */
-@media (max-width: 768px) {
-  *, *::before, *::after, html, body, a, button, input, textarea, [role="button"], iframe {
-    cursor: auto !important;
-  }
-}
+/* End www.Cursors-4U.com Code */
 
 /* GPU acceleration on all animated elements */
 [data-animate] {
@@ -304,8 +298,8 @@ h2.tracking-widest,
 
 /* Nav Links: 10px, 0.15em letter-spacing, uppercase, color #9a8f7e, hover color #1a1612 */
 .nav-link-item, header a {
-  font-size: 10px !important;
-  letter-spacing: 0.15em !important;
+  font-size: 16px;
+  letter-spacing: 0.18em;
   text-transform: uppercase !important;
   color: #9a8f7e !important;
   transition: color 0.3s ease !important;
@@ -395,7 +389,7 @@ main {
 .section-wrapper {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: 80vh;
   background: #f5f0e8;
   overflow-x: hidden !important;
 }
@@ -410,29 +404,30 @@ main {
 
 /* Fluid Spacing Override */
 .section-padding {
-  padding-top: 130px !important;
-  padding-bottom: 130px !important;
+  padding-top: 80px !important;
+  padding-bottom: 80px !important;
 }
 
 @media (max-width: 1024px) {
   .section-padding {
-    padding-top: 110px !important;
-    padding-bottom: 110px !important;
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
   }
 }
 
 @media (max-width: 768px) {
   .section-padding {
-    padding-top: 90px !important;
-    padding-bottom: 90px !important;
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
   }
 }
 
 /* Fluid Section Heading / Subheading system */
 .section-title {
+  font-family: var(--font-display) !important;
   font-size: clamp(40px, 6vw, 80px) !important;
   font-weight: 900 !important;
-  letter-spacing: -3px !important;
+  letter-spacing: -0.03em !important;
   line-height: 1.05 !important;
   color: #1a1612 !important;
   text-transform: uppercase !important;
@@ -440,6 +435,7 @@ main {
 }
 
 .section-subtitle {
+  font-family: var(--font-body) !important;
   font-size: clamp(14px, 1.2vw, 16px) !important;
   letter-spacing: 0.05em !important;
   line-height: 1.6 !important;

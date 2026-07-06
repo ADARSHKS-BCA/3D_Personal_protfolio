@@ -4,9 +4,8 @@ import MagneticButton from '../components/MagneticButton';
 import { useTheme } from '../context/ThemeContext';
 
 const socialLinks = [
-  { icon: '◈', label: 'GitHub', href: 'https://github.com/adarsh-ks' },
-  { icon: '◆', label: 'LinkedIn', href: 'https://linkedin.com/in/adarsh-ks' },
-  { icon: '✦', label: 'Twitter', href: 'https://twitter.com/adarsh_ks' },
+  { icon: '◈', label: 'GitHub', href: 'https://github.com/ADARSHKS-BCA' },
+  { icon: '◆', label: 'LinkedIn', href: 'https://www.linkedin.com/in/adarsh-ks-198724315' },
   { icon: '✉', label: 'Email', href: 'mailto:adarsh.ks@bcah.christuniversity.in' },
 ];
 

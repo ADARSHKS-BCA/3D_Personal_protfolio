@@ -1,8 +1,7 @@
 // src/App.jsx
 import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
 import Navbar from './components/Navbar';
-import CustomCursor from './components/CustomCursor';
-import Loader from './components/Loader';
+
 import Hero from './sections/Hero';
 import About from './sections/About';
 import Contact from './sections/Contact';
@@ -12,10 +11,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Skills    = lazy(() => import('./sections/Skills'));
-const Projects  = lazy(() => import('./sections/Projects'));
-const Education = lazy(() => import('./sections/Education'));
-const Certs     = lazy(() => import('./sections/Certs'));
+import Skills from './sections/Skills';
+import Projects from './sections/Projects';
+import Education from './sections/Education';
+
 
 function SectionFallback() {
   return (
@@ -33,7 +32,6 @@ function SectionFallback() {
 }
 
 export default function App() {
-  const [isLoaded, setIsLoaded] = useState(false);
   const mainRef = useRef(null);
   
   // Initialize Lenis smooth scroll and sync with ScrollTrigger
@@ -50,20 +48,10 @@ export default function App() {
     }
   }, []);
 
-  // Guarantee page starts at top when loader completes
-  useEffect(() => {
-    if (isLoaded) {
-      window.scrollTo(0, 0);
-      if (window.lenis) {
-        window.lenis.scrollTo(0, { immediate: true });
-      }
-    }
-  }, [isLoaded]);
+
 
   // Master Cinematic Scroll Timeline
   useEffect(() => {
-    if (!isLoaded) return;
-
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
@@ -91,10 +79,10 @@ export default function App() {
         0
       );
 
-      // Line-by-line reveal of Hero title
-      entranceTl.fromTo('#hero .hero-title', 
-        { opacity: 0, y: 50, rotate: 1 }, 
-        { opacity: 1, y: 0, rotate: 0, stagger: 0.15, duration: 1.6 }, 
+      // Masked slide-in reveal of Hero title spans
+      entranceTl.fromTo('#hero .hero-title span', 
+        { y: '100%' }, 
+        { y: '0%', stagger: 0.18, duration: 1.0, ease: 'power4.out' }, 
         0.4
       );
 
@@ -112,11 +100,11 @@ export default function App() {
         1.0
       );
 
-      // ── 2. Hero Pinning (120vh) ──
+      // ── 2. Hero Pinning (60vh equivalent) ──
       ScrollTrigger.create({
         trigger: '#hero-wrapper',
         start: 'top top',
-        end: '+=120%',
+        end: '+=60%',
         pin: true,
         pinSpacing: true,
         scrub: true,
@@ -207,12 +195,12 @@ export default function App() {
         ease: 'power4.out',
       }, 0);
 
-      // ── 5. Skills Pinning (100vh) ──
+      // ── 5. Skills Pinning (50vh equivalent) ──
       const skillsPin = gsap.timeline({
         scrollTrigger: {
           trigger: '#skills-wrapper',
           start: 'top top',
-          end: '+=100%',
+          end: '+=50%',
           pin: true,
           pinSpacing: true,
           scrub: true,
@@ -336,12 +324,12 @@ export default function App() {
         ease: 'power4.out',
       }, 0);
 
-      // ── 9. Education Pinning & Internal Sequential Animations (90vh) ──
+      // ── 9. Education Pinning & Internal Sequential Animations (50vh equivalent) ──
       const eduPin = gsap.timeline({
         scrollTrigger: {
           trigger: '#education-wrapper',
           start: 'top top',
-          end: '+=90%',
+          end: '+=50%',
           pin: true,
           pinSpacing: true,
           scrub: true,
@@ -378,54 +366,8 @@ export default function App() {
         );
       });
 
-      // ── 10. Section Handoff: Education → Certifications ──
-      const eduToCerts = gsap.timeline({
-        scrollTrigger: {
-          trigger: '#certifications-wrapper',
-          start: 'top 85%',
-          end: 'top 35%',
-          scrub: 1,
-        }
-      });
-      eduToCerts.to('#education-wrapper .section-content-inner', {
-        opacity: 0,
-        scale: 0.97,
-        y: -80,
-        filter: 'blur(8px)',
-      }, 0);
-      eduToCerts.fromTo('#certifications-wrapper .section-content-inner', {
-        opacity: 0,
-        scale: 0.97,
-        y: 80,
-        filter: 'blur(8px)',
-      }, {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        ease: 'power4.out',
-      }, 0);
-
-      // Stagger emerge cert cards (No horizontal offsets)
-      gsap.fromTo('#certifications-wrapper .cert-card',
-        { opacity: 0, scale: 0.97, y: 50 },
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          stagger: 0.1,
-          ease: 'power4.out',
-          duration: 1.2,
-          scrollTrigger: {
-            trigger: '#certifications-wrapper',
-            start: 'top 70%',
-            toggleActions: 'play none none none',
-          }
-        }
-      );
-
-      // ── 11. Section Handoff: Certifications → Contact ──
-      const certsToContact = gsap.timeline({
+      // ── 10. Section Handoff: Education → Contact ──
+      const eduToContact = gsap.timeline({
         scrollTrigger: {
           trigger: '#contact-wrapper',
           start: 'top 85%',
@@ -433,13 +375,13 @@ export default function App() {
           scrub: 1,
         }
       });
-      certsToContact.to('#certifications-wrapper .section-content-inner', {
+      eduToContact.to('#education-wrapper .section-content-inner', {
         opacity: 0,
         scale: 0.97,
         y: -80,
         filter: 'blur(8px)',
       }, 0);
-      certsToContact.fromTo('#contact-wrapper .section-content-inner', {
+      eduToContact.fromTo('#contact-wrapper .section-content-inner', {
         opacity: 0,
         scale: 0.97,
         y: 80,
@@ -535,13 +477,11 @@ export default function App() {
       ctx.revert();
       clearTimeout(refreshTimeout);
     };
-  }, [isLoaded]);
+  }, []);
 
   return (
     <>
-      {!isLoaded && <Loader onComplete={() => setIsLoaded(true)} />}
-
-      {isLoaded && <div className="film-grain-overlay" />}
+      <div className="film-grain-overlay" />
 
       <div
         ref={mainRef}
@@ -550,10 +490,10 @@ export default function App() {
           minHeight: '100vh',
           position: 'relative',
           background: 'var(--bg)',
-          pointerEvents: isLoaded ? 'auto' : 'none',
+          pointerEvents: 'auto',
         }}
       >
-        <CustomCursor />
+
 
         <Navbar isEmbedded={false} />
         
@@ -575,30 +515,25 @@ export default function App() {
           {/* Skills */}
           <div className="section-wrapper" id="skills-wrapper">
             <div className="section-content-inner">
-              <Suspense fallback={<SectionFallback />}><Skills /></Suspense>
+              <Skills />
             </div>
           </div>
           
           {/* Projects */}
           <div className="section-wrapper" id="projects-wrapper">
             <div className="section-content-inner">
-              <Suspense fallback={<SectionFallback />}><Projects /></Suspense>
+              <Projects />
             </div>
           </div>
 
           {/* Education */}
           <div className="section-wrapper" id="education-wrapper">
             <div className="section-content-inner">
-              <Suspense fallback={<SectionFallback />}><Education /></Suspense>
+              <Education />
             </div>
           </div>
 
-          {/* Certifications */}
-          <div className="section-wrapper" id="certifications-wrapper">
-            <div className="section-content-inner">
-              <Suspense fallback={<SectionFallback />}><Certs /></Suspense>
-            </div>
-          </div>
+
 
           {/* Contact */}
           <div className="section-wrapper" id="contact-wrapper">
@@ -653,9 +588,9 @@ export default function App() {
             opacity: 0;
             transform: translateY(-20px);
           }
-          #hero .hero-title {
-            opacity: 0;
-            transform: translateY(50px) rotate(1deg);
+          #hero .hero-title span {
+            display: inline-block;
+            transform: translateY(100%);
           }
           #hero .hero-watermark {
             opacity: 0;

@@ -69,7 +69,7 @@ function ImageCarousel({ images, title }) {
   if (!images || images.length === 0) return null;
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-slate-950">
+    <div className="relative w-full h-full overflow-hidden bg-[#F8F6F1]">
       {images.map((src, idx) => (
         <div
           key={idx}
@@ -306,13 +306,8 @@ export default function Projects() {
         <h2
           className="section-title"
         >
-          Selected Products
+          Projects
         </h2>
-        <p
-          className="section-subtitle"
-        >
-          A curated presentation of software products, microservices, and mobile platforms engineered for production.
-        </p>
       </div>
 
       {/* Projects Stack */}
@@ -329,10 +324,10 @@ export default function Projects() {
               {/* Inner Wrapper for active/inactive scroll transitions */}
               <div className="project-inner-wrapper w-full flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-20 transition-all duration-300 will-change-transform">
                 
-                {/* ── Left Column: Large Product Card (60%) ── */}
-                <div className="w-full lg:w-[60%] flex-shrink-0 z-10">
+                {/* ── Left Column: Large Product Card (65%) ── */}
+                <div className="w-full lg:w-[65%] flex-shrink-0 z-10">
                   <div
-                    className="project-showcase-card aspect-[16/10] w-full rounded-[24px] overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-blue-500/20 dark:border-indigo-500/20 shadow-2xl relative transition-all duration-300 ease-out cursor-none project-card-glow"
+                    className="project-showcase-card aspect-[2/1] w-full rounded-[24px] overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-blue-500/20 dark:border-indigo-500/20 shadow-2xl relative transition-all duration-300 ease-out cursor-none project-card-glow"
                     onMouseMove={(e) => {
                       handleMouseMove(e);
                       handleCardMouseMove(e);
@@ -342,41 +337,24 @@ export default function Projects() {
                       willChange: 'transform, box-shadow',
                     }}
                   >
-                    {/* Inner frame wrapper simulating a clean browser window or product mockup */}
-                    <div className="w-full h-full flex flex-col">
-                      {/* Browser header bar decoration */}
-                      <div className="w-full h-8 bg-slate-100/90 dark:bg-slate-950/80 border-b border-slate-200 dark:border-white/5 px-4 flex items-center justify-between flex-shrink-0">
-                        <div className="flex gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
-                        </div>
-                        <div className="text-[10px] font-mono text-slate-400 dark:text-white/20 select-none">
-                          {project.category.toUpperCase()} // {project.title.toLowerCase()}.dev
-                        </div>
-                        <div className="w-8" />
-                      </div>
-
-                      {/* Content Area */}
-                      <div className="w-full flex-grow relative overflow-hidden">
-                        {hasImages ? (
-                          <ImageCarousel images={project.images} title={project.title} />
-                        ) : (
-                          <ProjectGraphic projectId={project.id} title={project.title} tech={project.tech} />
-                        )}
-                      </div>
+                    {/* Content Area */}
+                    <div className="w-full h-full relative overflow-hidden">
+                      {hasImages ? (
+                        <ImageCarousel images={project.images} title={project.title} />
+                      ) : (
+                        <ProjectGraphic projectId={project.id} title={project.title} tech={project.tech} />
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* ── Right Column: Product Explanation Panel (40%) ── */}
-                <div className="project-showcase-info w-full lg:w-[40%] flex flex-col justify-center">
+                {/* ── Right Column: Product Explanation Panel (35%) ── */}
+                <div className="project-showcase-info w-full lg:w-[35%] flex flex-col justify-center">
                   {/* Category Pill */}
                   <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-indigo-400 mb-2">
                     {project.category}
                   </span>
-
-                  {/* Title & Tagline */}
+{/* Title & Tagline */}
                   <h3 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
                     {project.title}
                   </h3>
@@ -385,9 +363,9 @@ export default function Projects() {
                   </p>
 
                   {/* Feature Bullets */}
-                  <div className="mb-6">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-white/50 mb-3">Core Features</h4>
-                    <ul className="flex flex-col gap-2.5">
+                  <div className="mb-8" style={{ fontFamily: 'var(--font-body)' }}>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-white/50 mb-4" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>Core Features</h4>
+                    <ul className="flex flex-col gap-3.5">
                       {project.features.map((feature, fIdx) => (
                         <li
                           key={fIdx}
@@ -401,11 +379,11 @@ export default function Projects() {
                   </div>
 
                   {/* Tech stack chips */}
-                  <div className="mb-8">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-white/50 mb-3">Tech Stack</h4>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="mb-10" style={{ fontFamily: 'var(--font-body)' }}>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-white/50 mb-4" style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.08em' }}>Tech Stack</h4>
+                    <div className="flex flex-wrap gap-2.5">
                       {project.tech.map((t) => (
-                        <span key={t} className="project-showcase-chip tech-chip py-1.5 px-3.5 text-xs">
+                        <span key={t} className="project-showcase-chip tech-chip py-1.5 px-3.5 text-xs rounded-lg" style={{ fontWeight: 500 }}>
                           {t}
                         </span>
                       ))}

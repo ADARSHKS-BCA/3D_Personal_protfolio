@@ -65,7 +65,6 @@ const MagneticButton = ({
       alignItems: 'center',
       justifyContent: 'center',
       willChange: 'transform',
-      cursor: 'none',
       ...style,
     },
     ...rest,

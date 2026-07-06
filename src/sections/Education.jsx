@@ -100,10 +100,12 @@ export default function Education() {
                 >
                   <h3
                     style={{
+                      fontFamily: 'var(--font-body)',
                       fontWeight: 600,
-                      fontSize: '1.125rem',
+                      fontSize: '1.15rem',
                       color: 'var(--text)',
                       marginBottom: '0.25rem',
+                      letterSpacing: '-0.01em',
                     }}
                   >
                     {entry.school}

@@ -22,8 +22,8 @@ const SKILLS = [
 ];
 
 const BIO_PARAGRAPHS = [
-  "I'm a Software Developer who believes great software is a complete thought — not a half-finished idea handed off to someone else.",
-  "What drives me isn't just shipping code. It's the moment a system you architected handles real load, a real user, a real problem — and holds. That's the feeling I chase on every project.",
+  "I'm a Software Developer who believes great software is a complete thought,not a half-finished idea handed off to someone else.",
+  "What drives me isn't just shipping code. It's the moment a system you architected handles real load, a real user, a real problem and holds. That's the feeling I chase on every project.",
   "I'm continuously pushing my engineering standards toward production-level quality, because good enough was never the goal.",
 ];
 
@@ -159,8 +159,8 @@ export default function About() {
             {/* Download CV button */}
             <div className="about__cta">
               <MagneticButton>
-                <a href="#" className="about__cv-button">
-                  Download CV
+                <a href="/Adarsh_KS_Resume.pdf" download="Adarsh_KS_Resume.pdf" className="about__cv-button">
+                  Download Resume
                 </a>
               </MagneticButton>
             </div>

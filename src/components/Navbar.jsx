@@ -93,29 +93,17 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
           background: 'transparent',
           boxShadow: 'none',
           borderBottom: 'none',
-          padding: '24px 8vw', // 8vw padding on left/right matching the Hero design layout
+          padding: '32px 8vw', // Increased header vertical padding
           display: visible ? 'flex' : 'none',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          fontFamily: "'Inter', sans-serif",
+          justifyContent: 'center',
+          fontFamily: "var(--font-body)",
           transition: 'all 0.3s ease',
         }}
       >
-        {/* Left Side: Logo AK */}
-        <div 
-          style={{
-            fontSize: '18px',
-            fontWeight: '900',
-            color: '#1a1612', // Bold black
-            letterSpacing: '1px',
-            userSelect: 'none',
-          }}
-        >
-          AK
-        </div>
 
-        {/* Desktop Links - Right aligned, 10px, 0.15em letter-spacing, uppercase, color #9a8f7e */}
-        <div className="nav-desktop-container" style={{ gap: '32px', display: 'flex', alignItems: 'center', position: 'relative' }}>
+        {/* Desktop Links - Centered, 16px, 0.18em letter-spacing, uppercase, color #9a8f7e */}
+        <div className="nav-desktop-container" style={{ gap: '36px', display: 'flex', alignItems: 'center', position: 'relative' }}>
           {navLinks.map((link) => {
             const sectionId = link.href.replace('#', '');
             const isActive = activeSection === sectionId;
@@ -127,10 +115,10 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
                 onClick={(e) => handleNavClick(e, link.href)}
                 data-cursor="pointer"
                 style={{
-                  fontSize: '10px',
+                  fontSize: '16px',
                   fontWeight: isActive ? 700 : 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.15em',
+                  letterSpacing: '0.18em',
                   color: isActive ? '#e8622a' : '#9a8f7e', // Highlight with divider accent color (#e8622a)
                   textDecoration: 'none',
                   position: 'relative',
