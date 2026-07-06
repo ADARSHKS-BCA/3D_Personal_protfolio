@@ -229,6 +229,9 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
         }
 
         @media (max-width: 767px) {
+          header {
+            justify-content: flex-end !important;
+          }
           .nav-desktop-container {
             display: none !important;
           }

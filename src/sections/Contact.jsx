@@ -65,17 +65,33 @@ export default function Contact() {
 
     setLoading(true);
     try {
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+      if (!serviceId || !templateId || !publicKey) {
+        throw new Error('EmailJS environment variables are missing. Please define VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY.');
+      }
+
+      // Temporary payload log for verification
+      console.log('Sending payload to EmailJS:', {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || '(No Subject)',
+        message: formData.message,
+      });
+
       await emailjs.sendForm(
-        'YOUR_SERVICE_ID',
-        'YOUR_TEMPLATE_ID',
+        serviceId,
+        templateId,
         formRef.current,
-        'YOUR_PUBLIC_KEY'
+        publicKey
       );
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
       setErrors({});
     } catch (err) {
-      console.error('EmailJS Error:', err);
+      console.error('Contact Form Submission Failed:', err.message || err);
       setErrorState(true);
     } finally {
       setLoading(false);

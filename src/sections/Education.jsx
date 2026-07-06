@@ -205,17 +205,22 @@ export default function Education() {
         /* ── Responsive: mobile < 768px ── */
         @media (max-width: 768px) {
           .edu-timeline-line {
-            left: 1rem !important;
+            left: 1.5rem !important;
             margin-left: 0 !important;
           }
 
           .edu-timeline-node {
             justify-content: flex-start !important;
-            padding-left: 3rem;
+            padding-left: 3.5rem !important;
+            padding-right: 1.5rem !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
           }
 
           .edu-timeline-node .edu-timeline-card {
             width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 1rem !important;
           }
 
           .edu-card-right,
@@ -229,11 +234,11 @@ export default function Education() {
           }
 
           .edu-timeline-marker {
-            left: 1rem !important;
+            left: 1.5rem !important;
           }
 
           .edu-timeline-connector {
-            left: calc(1rem + 8px) !important;
+            left: calc(1.5rem + 8px) !important;
             right: auto !important;
             width: calc(2rem - 8px) !important;
           }
