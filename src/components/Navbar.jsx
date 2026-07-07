@@ -62,17 +62,25 @@ const Navbar = ({ isEmbedded = false, scale = 1.0 }) => {
           if (scrollContainer) {
             scrollContainer.scrollTo({
               top: (el.offsetTop - 70) * scale,
-              behavior: 'smooth'
+              behavior: targetId === 'contact' ? 'auto' : 'smooth'
             });
           }
         } else {
-          if (window.lenis) {
-            window.lenis.scrollTo(el, {
-              duration: 1.2,
-              easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2 // cubic ease in out
-            });
+          if (targetId === 'contact') {
+            if (window.lenis) {
+              window.lenis.scrollTo(el, { immediate: true });
+            } else {
+              el.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
           } else {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (window.lenis) {
+              window.lenis.scrollTo(el, {
+                duration: 1.2,
+                easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2 // cubic ease in out
+              });
+            } else {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
           }
         }
       }
