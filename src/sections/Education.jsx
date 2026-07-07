@@ -225,12 +225,12 @@ export default function Education() {
 
           .edu-card-right,
           .edu-card-left {
-            transform: translateX(80px);
+            transform: none !important;
           }
 
           .edu-node-visible .edu-card-right,
           .edu-node-visible .edu-card-left {
-            transform: translateX(0);
+            transform: none !important;
           }
 
           .edu-timeline-marker {
