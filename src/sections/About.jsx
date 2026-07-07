@@ -107,11 +107,6 @@ function TiltCard() {
           }}
         />
 
-        {/* Open to work badge */}
-        <div className="about__badge">
-          <span className="about__badge-dot" />
-          <span className="about__badge-text">Open to work</span>
-        </div>
       </div>
     </div>
   );

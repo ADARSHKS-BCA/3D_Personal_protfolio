@@ -314,7 +314,7 @@ h2.tracking-widest,
 }
 
 /* Buttons: bg #e8622a, text white, border-radius 4px max, no gradients/glows */
-button, .btn, .magnetic-btn, .button, .about__cta, .contact__submit, input[type="submit"] {
+button, .btn, .magnetic-btn, .button, .about__cv-button, .contact__submit, input[type="submit"] {
   background-color: #e8622a !important;
   background: #e8622a !important;
   color: #ffffff !important;

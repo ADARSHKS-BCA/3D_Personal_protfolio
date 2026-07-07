@@ -126,26 +126,10 @@ export default function Contact() {
       <div className="contact-layout">
         {/* Left column – Info */}
         <div className="contact-left" data-animate>
-          {/* Availability status */}
-          <div className="available-badge">
-            <span
-              style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '50%',
-                background: '#22c55e',
-                display: 'inline-block',
-                boxShadow: '0 0 8px #22c55e',
-                animation: 'pulse-green 2s infinite',
-              }}
-            />
-            <span style={{ color: isDark ? 'var(--text)' : '#111827', fontWeight: 600 }}>Available for work</span>
-          </div>
-
           <h3 className="contact-heading section-title">
             Contact Me
           </h3>
-
+          <div className="contact-accent-line"></div>
           <p className="contact-subtext section-subtitle">
             Open to full-time roles, freelance projects, and interesting problems worth solving.
           </p>
@@ -154,24 +138,19 @@ export default function Contact() {
           <div className="social-links-container">
             {socialLinks.map((link) => (
               <div key={link.label} className="social-card-item" data-animate>
-                <MagneticButton as="a" href={link.href} target="_blank" rel="noopener noreferrer" style={{ width: '100%' }}>
-                  <div
-                    className="glass-card glass-card-hover"
-                    style={{
-                      padding: '1rem',
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      borderRadius: '0.75rem',
-                      cursor: 'pointer',
-                      background: 'rgba(17, 24, 39, 0.65)',
-                      border: '1px solid rgba(99, 102, 241, 0.15)',
-                    }}
-                  >
-                    <span style={{ fontSize: '1.25rem' }}>{link.icon}</span>
-                    <span style={{ color: isDark ? 'var(--text)' : '#111827', fontWeight: 500 }}>{link.label}</span>
-                  </div>
+                <MagneticButton
+                  as="a"
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="contact-social-link"
+                  style={{ width: '100%' }}
+                >
+                  <span className="contact-social-label">
+                    <span className="contact-social-icon">{link.icon}</span>
+                    {link.label}
+                  </span>
+                  <span className="contact-social-arrow">→</span>
                 </MagneticButton>
               </div>
             ))}
@@ -411,12 +390,21 @@ export default function Contact() {
           margin-bottom: 20px !important;
         }
 
+        .contact-accent-line {
+          width: 32px;
+          height: 3px;
+          background-color: var(--gold, #e8622a);
+          margin-bottom: 20px;
+        }
+
         .contact-subtext {
           font-size: 16px !important;
           color: var(--text-muted) !important;
           line-height: 1.7 !important;
           max-width: 380px !important;
           margin-bottom: 0 !important;
+          margin-left: 0 !important;
+          margin-right: auto !important;
         }
 
         .available-badge {
@@ -426,11 +414,70 @@ export default function Contact() {
         }
 
         .social-links-container {
-          margin-top: 40px !important;
+          margin-top: 24px !important;
           display: flex;
           flex-direction: column;
-          gap: 16px !important;
           width: 100%;
+        }
+
+        .social-links-container .magnetic-btn {
+          background: transparent !important;
+          background-color: transparent !important;
+          border: none !important;
+          border-radius: 0 !important;
+          color: inherit !important;
+          width: 100%;
+          justify-content: stretch;
+        }
+
+        .contact-social-link {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: center !important;
+          padding: 20px 0 !important;
+          border-bottom: 1px solid var(--border, #ddd8cf) !important;
+          color: #1a1612 !important;
+          text-decoration: none !important;
+          font-family: var(--font-display, 'Outfit', sans-serif) !important;
+          font-size: 18px !important;
+          font-weight: 700 !important;
+          transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important;
+        }
+
+        .social-card-item:first-child .contact-social-link {
+          border-top: 1px solid var(--border, #ddd8cf) !important;
+        }
+
+        .contact-social-label {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .contact-social-icon {
+          font-size: 16px;
+          color: #9a8f7e;
+          transition: color 0.3s ease;
+        }
+
+        .contact-social-arrow {
+          font-size: 20px;
+          transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+          color: #9a8f7e;
+        }
+
+        .contact-social-link:hover {
+          color: #e8622a !important;
+          padding-left: 8px !important;
+        }
+
+        .contact-social-link:hover .contact-social-icon {
+          color: #e8622a;
+        }
+
+        .contact-social-link:hover .contact-social-arrow {
+          transform: translateX(8px);
+          color: #e8622a;
         }
 
         .contact-right {

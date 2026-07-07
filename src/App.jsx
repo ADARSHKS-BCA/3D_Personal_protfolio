@@ -370,8 +370,8 @@ export default function App() {
       const eduToContact = gsap.timeline({
         scrollTrigger: {
           trigger: '#contact-wrapper',
-          start: 'top 85%',
-          end: 'top 35%',
+          start: 'top bottom',
+          end: 'top 50%',
           scrub: 1,
         }
       });

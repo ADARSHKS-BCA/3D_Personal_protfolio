@@ -68,7 +68,7 @@ export default function Education() {
                     background: 'var(--bg)',
                     transform: 'translateX(-50%) scale(0)',
                     zIndex: 2,
-                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease, box-shadow 0.4s ease',
+                    transition: 'background 0.4s ease, box-shadow 0.4s ease',
                   }}
                 />
 
@@ -81,7 +81,6 @@ export default function Education() {
                     height: '2px',
                     background: 'var(--gold)',
                     opacity: 0,
-                    transition: 'opacity 0.4s ease 0.2s',
                     ...(!isEven
                       ? { left: 'calc(50% + 8px)', width: 'calc(2.5rem - 8px)' }
                       : { right: 'calc(50% + 8px)', width: 'calc(2.5rem - 8px)' }
@@ -163,8 +162,6 @@ export default function Education() {
         /* ── Card slide-in transitions ── */
         .edu-timeline-card {
           opacity: 0;
-          transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
-                      transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
           will-change: opacity, transform;
         }
 
